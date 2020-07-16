@@ -1,0 +1,99 @@
+# 项目相关配置
+workflow:
+  # 名称
+  name: workflow-activiti-rest
+  # 版本
+  version: 1.0.0
+  # 版权年份
+  copyrightYear: 2020
+  # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/uploadPath）
+  profile: D:/workflow/uploadPath
+  # 当前操作人
+  operator: thomas
+
+
+#日志配置
+logging:
+  path: E:/Data/idea-workspace/workflow-activiti/logs #保存日志
+  lv: info # 控制台日志输出级别
+  dateSize: 1 # 日志保存天数
+
+# 开发环境配置
+server:
+  # 服务器的HTTP端口，默认为80
+  port: 9090
+  servlet:
+    # 应用的访问路径
+    context-path: /
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # tomcat最大线程数，默认为200
+    max-threads: 800
+    # Tomcat启动初始化的线程数，默认值25
+    min-spare-threads: 30
+
+# Spring配置
+spring:
+  autoconfigure:
+    exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure
+  # activiti 模块
+  # 解决启动报错：class path resource [processes/] cannot be resolved to URL because it does not exist
+  activiti:
+    check-process-definitions: false
+    # 检测身份信息表是否存在
+    #db-identity-used: false
+  datasource:
+    dynamic:
+      p6spy: true
+      #druid配置
+      druid:
+        #初始化大小,最小,最大
+        initial-size: 5
+        min-idle: 5
+        max-active: 20
+        #配置获取连接等待超时的时间
+        max-wait: 60000
+        #配置间隔多久才进行一次检测,检测需要关闭的空闲连接,单位是毫秒
+        time-between-eviction-runs-millis: 60000
+        #配置一个连接在池中最小生存的时间,单位是毫秒
+        min-evictable-idle-time-millis: 300000
+        validation-query: SELECT 1 FROM DUAL
+        test-while-idle: true
+        test-on-borrow: false
+        test-on-return: false
+        #打开PSCache,并且指定每个连接上PSCache的大小
+        pool-prepared-statements: true
+        max-pool-prepared-statement-per-connection-size: 20
+        #配置监控统计拦截的filters,去掉后监控界面sql无法统计,'wall'用于防火墙
+        filters: stat,wall # 注意这个值和druid原生不一致，默认启动了stat,wall
+        filter:
+          log4j:
+            enabled: true
+          wall:
+            config:
+              # 允许多个语句一起执行
+              multi-statement-allow: true
+            enabled: true
+            db-type: mysql
+          stat:
+            enabled: true
+            db-type: mysql
+      # 默认源
+      primary: activiti-demo
+      datasource:
+        activiti-demo:
+          url: jdbc:mysql://localhost:3306/activiti-demo?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
+          username: root
+          password: gaoyipeng
+          driver-class-name: com.mysql.jdbc.Driver
+        slave:
+          url: jdbc:mysql://localhost:3306/slave1?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
+          username: root
+          password: gaoyipeng
+          driver-class-name: com.mysql.jdbc.Driver
+          schema: db/schema.sql
+
+
+
+

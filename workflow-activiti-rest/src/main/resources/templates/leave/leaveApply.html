@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>请假申请</title>
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}">
+</head>
+<body>
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+    <legend>请假申请</legend>
+</fieldset>
+<form class="layui-form" th:action="@{/leave/start}" th:object="${leave}" method="post" enctype="application/json">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">请假类型</label>
+            <div class="layui-input-inline">
+                <select lay-verify="required" lay-search=""  th:id="leaveType" th:field="*{leaveType}">
+                    <option value="">直接选择或搜索选择</option>
+                    <option value="公休">公休</option>
+                    <option value="病假">病假</option>
+                    <option value="调休">调休</option>
+                    <option value="事假">事假</option>
+                    <option value="婚假">婚假</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">开始时间</label>
+            <div class="layui-input-inline">
+                <input type="text"  th:id="startTime" th:field="*{startTime}" autocomplete="off"  placeholder="yyyy-MM-dd HH:mm:ss"  class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">结束时间</label>
+            <div class="layui-input-inline">
+                <input type="text" th:id="endTime" th:field="*{endTime}"  autocomplete="off" placeholder="yyyy-MM-dd HH:mm:ss"  class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">请假原因</label>
+        <div class="layui-input-block">
+            <textarea placeholder="请输入内容" th:field="*{reason}" class="layui-textarea"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+
+</body>
+<script type="text/javascript" th:src="@{/layui/layui.all.js}"></script>
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#startTime'
+            ,type: 'datetime'
+        });
+        laydate.render({
+            elem: '#endTime'
+            ,type: 'datetime'
+        });
+
+
+        //监听提交
+        form.on('submit(demo1)', function(data){
+            layer.alert(JSON.stringify(data.field), {
+                title: '最终的提交信息'
+            })
+            return true;
+        });
+
+    });
+</script>
+</html>
