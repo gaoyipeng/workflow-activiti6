@@ -85,15 +85,11 @@ spring:
         activiti-demo:
           url: jdbc:mysql://localhost:3306/activiti-demo?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
           username: root
-          password: gaoyipeng
+          password: 123456
           driver-class-name: com.mysql.jdbc.Driver
-        slave:
-          url: jdbc:mysql://localhost:3306/slave1?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
-          username: root
-          password: gaoyipeng
-          driver-class-name: com.mysql.jdbc.Driver
-          schema: db/schema.sql
-
-
-
-
+          #slave:
+          #url: jdbc:mysql://localhost:3306/slave1?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
+          #username: root
+          #password: 123456
+          #driver-class-name: com.mysql.jdbc.Driver
+          #schema: db/schema.sql
