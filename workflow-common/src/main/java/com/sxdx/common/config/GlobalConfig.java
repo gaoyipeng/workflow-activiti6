@@ -25,6 +25,7 @@ public class GlobalConfig
     /** 上传路径 */
     private static String profile;
 
+    /** 当前操作人**/
     private static String operator;
 
 

@@ -9,7 +9,7 @@ workflow:
   # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/uploadPath）
   profile: D:/workflow/uploadPath
   # 当前操作人
-  operator: thomas
+  operator: kafeitu
 
 
 #日志配置
@@ -85,7 +85,7 @@ spring:
         activiti-demo:
           url: jdbc:mysql://localhost:3306/activiti-demo?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
           username: root
-          password: 123456
+          password: gaoyipeng
           driver-class-name: com.mysql.jdbc.Driver
           #slave:
           #url: jdbc:mysql://localhost:3306/slave1?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&nullCatalogMeansCurrent=true
