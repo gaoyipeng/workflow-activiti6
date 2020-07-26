@@ -1,8 +1,10 @@
 package com.sxdx.workflow.activiti.rest.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.pagehelper.PageInfo;
 import com.sxdx.common.config.GlobalConfig;
 import com.sxdx.common.constant.CodeEnum;
 import com.sxdx.common.constant.Constants;
@@ -11,6 +13,7 @@ import com.sxdx.common.util.CommonResponse;
 import com.sxdx.common.util.StringUtils;
 import com.sxdx.common.util.file.FileUploadUtils;
 import com.sxdx.common.util.text.text.Convert;
+import com.sxdx.workflow.activiti.rest.entity.ProcessDefinitionEntityImplVo;
 import com.sxdx.workflow.activiti.rest.service.ProcessDefinitionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,7 +25,9 @@ import org.activiti.editor.constants.ModelDataJsonConstants;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntityImpl;
 import org.activiti.engine.repository.Model;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
@@ -39,7 +44,9 @@ import javax.xml.stream.XMLStreamReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Api(value="流程定义模块", description="流程定义模块")
 @RestController
@@ -86,6 +93,16 @@ public class ProcessDefinitionController {
             log.error("上传流程定义文件失败！", e);
             return new CommonResponse().code(CodeEnum.FAILURE.getCode()).message(e.getMessage());
         }
+    }
+
+    @PostMapping("/findProcessDefinition")
+    @ApiOperation(value = "查询流程定义列表",notes = "查询流程定义列表")
+    public CommonResponse findProcessDefinition(@RequestParam(value = "processDefinitionKey",required = false) @ApiParam("流程定义Key")String processDefinitionKey,
+                                                @RequestParam(value = "processDefinitionName",required = false) @ApiParam("流程定义Name")String processDefinitionName,
+                                                @RequestParam(value = "pageNum", required = false,defaultValue = "1")@ApiParam(value = "页码" ,required = false)int pageNum,
+                                                @RequestParam(value = "pageSize", required = false,defaultValue = "10")@ApiParam(value = "条数" ,required = false)int pageSize)  {
+        PageInfo<ProcessDefinitionEntityImplVo> list= processDefinitionService.findProcessDefinition(pageNum,pageSize,processDefinitionKey,processDefinitionName);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(list);
     }
 
     /**

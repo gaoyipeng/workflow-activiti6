@@ -99,4 +99,16 @@ public class ProcessHistoryServiceImpl implements ProcessHistoryService {
         PageInfo<HistoricProcessInstance> pageAttachments = new PageInfo<>(list);
         return pageAttachments;
     }
+
+    @Override
+    public PageInfo<HistoricProcessInstance> queryHistoricInstance(int pageNum, int pageSize) {
+        List<HistoricProcessInstance> list = null;
+
+        PageHelper.startPage(pageNum, pageSize);
+        list = historyService.createHistoricProcessInstanceQuery()
+                .orderByProcessInstanceStartTime().asc()//排序
+                .list();
+        PageInfo<HistoricProcessInstance> pageAttachments = new PageInfo<>(list);
+        return pageAttachments;
+    }
 }

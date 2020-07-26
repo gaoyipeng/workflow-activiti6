@@ -13,6 +13,8 @@ public interface ProcessHistoryService {
     List<HistoricActivityInstance> getHistoryActInstanceList(String finished, String processInstanceId);
     List<HistoricVariableInstance> getHistoryProcessVariables(String processInstanceId);
     PageInfo<HistoricProcessInstance> getFinishedInstanceList(String processInstanceId, int pageNum, int pageSize);
+    PageInfo<HistoricProcessInstance> queryHistoricInstance(int pageNum, int pageSize);
+
 
 
 }
