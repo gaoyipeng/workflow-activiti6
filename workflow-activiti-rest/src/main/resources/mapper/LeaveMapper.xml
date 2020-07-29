@@ -21,4 +21,9 @@
         id, user_id, apply_time, start_time, end_time, leave_type, process_instance_id, reality_end_time, reality_start_time, reason
     </sql>
 
+    <select id="getAll" resultType="com.sxdx.workflow.activiti.rest.entity.Leave">
+        select <include refid="Base_Column_List" />
+        from oa_leave where 1=1
+    </select>
+
 </mapper>

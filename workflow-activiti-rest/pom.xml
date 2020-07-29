@@ -157,15 +157,26 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>
+            <version>5.1.10</version>
+        </dependency>
+        <!-- pagehelper 依赖 -->
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>2.1</version>
+        </dependency>
+
+       <!-- <dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
             <version>1.2.13</version>
-            <!--使用spring boot2整合 pagehelper-spring-boot-starter必须排除一下依赖
+            &lt;!&ndash;使用spring boot2整合 pagehelper-spring-boot-starter必须排除一下依赖
                 因为pagehelper-spring-boot-starter也已经在pom依赖了mybatis与mybatis-spring
                 所以会与mybatis-plus-boot-starter中的mybatis与mybatis-spring发生冲突
-            -->
+            &ndash;&gt;
             <exclusions>
                 <exclusion>
                     <groupId>org.mybatis</groupId>
@@ -176,7 +187,7 @@
                     <artifactId>mybatis-spring</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency>-->
 
 
 

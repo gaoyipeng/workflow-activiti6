@@ -2,7 +2,10 @@ package com.sxdx.workflow.activiti.rest.service.impl;
 
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.sxdx.common.config.GlobalConfig;
 import com.sxdx.workflow.activiti.rest.entity.Leave;
 import com.sxdx.workflow.activiti.rest.mapper.LeaveMapper;
@@ -104,4 +107,21 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
         return results;
     }
 
+
+    public List<Leave>  getAll(){
+
+        /**
+         * 如果使用MP帮我们封装好的方法，例如这个 selectBatchIds，则PageHelper分页失效。但是getAll方法是自己写的，则可以继续使用
+         * PageHelper.startPage(2,2);
+         * List<Integer> list = new ArrayList<>();
+         *     list.add(1);
+         *     list.add(2);
+         *     list.add(3);
+         *  List<Leave> leaveList = leaveMapper.selectBatchIds(list);
+         */
+        PageHelper.startPage(2,2);
+        List<Leave> leaveList = leaveMapper.getAll();
+        PageInfo<Leave> pageInfo = new PageInfo<>(leaveList);
+        return leaveList;
+    }
 }

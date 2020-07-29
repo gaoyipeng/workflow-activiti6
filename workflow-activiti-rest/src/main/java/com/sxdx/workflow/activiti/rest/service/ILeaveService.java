@@ -20,4 +20,5 @@ import java.util.List;
 public interface ILeaveService extends IService<Leave> {
     Leave startForm(Leave leave);
     List<Leave> getTodoList(String processDefinitionKey, HttpServletRequest request);
+    List<Leave> getAll();
 }

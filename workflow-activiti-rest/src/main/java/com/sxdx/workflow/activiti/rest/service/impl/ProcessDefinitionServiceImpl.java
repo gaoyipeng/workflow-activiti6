@@ -1,16 +1,13 @@
 package com.sxdx.workflow.activiti.rest.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+import cn.hutool.core.bean.BeanUtil;
 import com.sxdx.common.util.StringUtils;
-import com.sxdx.workflow.activiti.rest.entity.ProcessDefinitionEntityImplVo;
 import com.sxdx.workflow.activiti.rest.service.ProcessDefinitionService;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,28 +45,35 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
     }
 
     @Override
-    public PageInfo<ProcessDefinitionEntityImplVo> findProcessDefinition(int pageNum, int pageSize, String processDefinitionKey, String processDefinitionName)  {
+    public List<Map<String ,Object>> findProcessDefinition(int pageNum, int pageSize, String processDefinitionKey, String processDefinitionName)  {
 
+        List<Map<String ,Object>> allList = new ArrayList<>();
         ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();//创建一个流程定义查询
-        List<ProcessDefinition> list = null;
-        List<ProcessDefinitionEntityImplVo> list1 = new ArrayList<>();
+        List<ProcessDefinition> processDefinitionList = null;
 
         if (processDefinitionKey != null) processDefinitionQuery = processDefinitionQuery.processDefinitionKey(processDefinitionKey);//根据流程定义Key查询
         if (processDefinitionName != null) processDefinitionQuery = processDefinitionQuery.processDefinitionNameLike(processDefinitionName);//根据流程定义name查询
 
-        PageHelper.startPage(pageNum, pageSize);
-        list = processDefinitionQuery.orderByProcessDefinitionName().desc()//按照流程定义的名称降序排列
-                .orderByProcessDefinitionVersion().asc()//按照版本的升序排列
-                .list();//返回一个集合列表，封装流程定义
-        PageInfo<ProcessDefinition> pageAttachments1 = new PageInfo<>(list);
+        //PageHelper.startPage(pageNum, pageSize);
+        processDefinitionList = processDefinitionQuery.orderByProcessDefinitionName().desc()//按照流程定义的名称降序排列
+                .orderByProcessDefinitionVersion().desc()//按照版本的降序排列
+                .list();
 
-        // ============= 对上面查询结果进行封装 ==================
-        for (ProcessDefinition processDefinition : list) {
+        for (ProcessDefinition processDefinition : processDefinitionList) {
+            Map<String ,Object> map = new HashMap<>();
+            String deploymentId = processDefinition.getDeploymentId();
+            Deployment deployment = repositoryService.createDeploymentQuery().deploymentId(deploymentId).singleResult();
+            map.put("processDefinition", BeanUtil.beanToMap(processDefinition));
+            map.put("deployment",BeanUtil.beanToMap(deployment));
+            allList.add(map);
+        }
+
+        // ============= 对上面查询结果进行封装 否则ProcessDefinition对象无法转为JSON格式数据返回前端 ==================
+       /* for (ProcessDefinition processDefinition : list) {
             ProcessDefinitionEntityImplVo processDefinitionEntityImplVo = new ProcessDefinitionEntityImplVo();
             BeanUtils.copyProperties(processDefinition, processDefinitionEntityImplVo);
             list1.add(processDefinitionEntityImplVo);
-        }
-        PageInfo<ProcessDefinitionEntityImplVo> pageAttachments = new PageInfo<>(list1);
-        return pageAttachments;
+        }*/
+        return allList;
     }
 }
