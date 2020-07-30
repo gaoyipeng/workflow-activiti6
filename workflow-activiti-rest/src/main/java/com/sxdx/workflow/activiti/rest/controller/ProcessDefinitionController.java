@@ -10,6 +10,7 @@ import com.sxdx.common.constant.CodeEnum;
 import com.sxdx.common.constant.Constants;
 import com.sxdx.common.exception.base.CommonException;
 import com.sxdx.common.util.CommonResponse;
+import com.sxdx.common.util.Page;
 import com.sxdx.common.util.StringUtils;
 import com.sxdx.common.util.file.FileUploadUtils;
 import com.sxdx.workflow.activiti.rest.service.ProcessDefinitionService;
@@ -91,7 +92,7 @@ public class ProcessDefinitionController {
                                                 @RequestParam(value = "processDefinitionName",required = false) @ApiParam("流程定义Name")String processDefinitionName,
                                                 @RequestParam(value = "pageNum", required = false,defaultValue = "1")@ApiParam(value = "页码" ,required = false)int pageNum,
                                                 @RequestParam(value = "pageSize", required = false,defaultValue = "10")@ApiParam(value = "条数" ,required = false)int pageSize)  {
-        List<Map<String ,Object>> list= processDefinitionService.findProcessDefinition(pageNum,pageSize,processDefinitionKey,processDefinitionName);
+        Page  list = processDefinitionService.findProcessDefinition(pageNum,pageSize,processDefinitionKey,processDefinitionName);
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(list);
     }
 

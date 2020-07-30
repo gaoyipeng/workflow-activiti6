@@ -1,6 +1,7 @@
 package com.sxdx.workflow.activiti.rest.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.sxdx.common.util.Page;
 import com.sxdx.common.util.StringUtils;
 import com.sxdx.workflow.activiti.rest.service.ProcessDefinitionService;
 import org.activiti.engine.RepositoryService;
@@ -45,7 +46,7 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
     }
 
     @Override
-    public List<Map<String ,Object>> findProcessDefinition(int pageNum, int pageSize, String processDefinitionKey, String processDefinitionName)  {
+    public Page findProcessDefinition(int pageNum, int pageSize, String processDefinitionKey, String processDefinitionName)  {
 
         List<Map<String ,Object>> allList = new ArrayList<>();
         ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();//创建一个流程定义查询
@@ -54,10 +55,19 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
         if (processDefinitionKey != null) processDefinitionQuery = processDefinitionQuery.processDefinitionKey(processDefinitionKey);//根据流程定义Key查询
         if (processDefinitionName != null) processDefinitionQuery = processDefinitionQuery.processDefinitionNameLike(processDefinitionName);//根据流程定义name查询
 
-        //PageHelper.startPage(pageNum, pageSize);
-        processDefinitionList = processDefinitionQuery.orderByProcessDefinitionName().desc()//按照流程定义的名称降序排列
-                .orderByProcessDefinitionVersion().desc()//按照版本的降序排列
-                .list();
+
+        processDefinitionQuery = processDefinitionQuery.orderByProcessDefinitionName().desc()//按照流程定义的名称降序排列
+                .orderByProcessDefinitionVersion().desc();//按照版本的降序排列
+
+        Page page = new Page(pageNum,pageSize);
+/*
+        int firstResult = (pageNum-1) * pageSize;
+        int maxResults = pageSize;
+*/
+
+        processDefinitionList = processDefinitionQuery.listPage(page.getFirstResult(),page.getMaxResults());
+        //获取总页数
+        int total = (int) processDefinitionQuery.count();
 
         for (ProcessDefinition processDefinition : processDefinitionList) {
             Map<String ,Object> map = new HashMap<>();
@@ -67,13 +77,8 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
             map.put("deployment",BeanUtil.beanToMap(deployment));
             allList.add(map);
         }
-
-        // ============= 对上面查询结果进行封装 否则ProcessDefinition对象无法转为JSON格式数据返回前端 ==================
-       /* for (ProcessDefinition processDefinition : list) {
-            ProcessDefinitionEntityImplVo processDefinitionEntityImplVo = new ProcessDefinitionEntityImplVo();
-            BeanUtils.copyProperties(processDefinition, processDefinitionEntityImplVo);
-            list1.add(processDefinitionEntityImplVo);
-        }*/
-        return allList;
+        page.setTotal(total);
+        page.setList(allList);
+        return page;
     }
 }

@@ -32,10 +32,9 @@ mybatis-plus:
     call-setters-on-nulls: true
     # 这个配置会将执行的sql打印出来，在开发或测试的时候可以用
     #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
 pagehelper:
+  # 指定使用的数据库数据库
   helperDialect: mysql
   # reasonable：分页合理化参数，默认值为false。当该参数设置为 true 时，pageNum<=0 时会查询第一页， 		pageNum>pages（超过总数时），会查询最后一页。默认false 时，直接根据参数进行查询。
-  reasonable: true
-  supportMethodsArguments: true
-  params: count=countSql
+  reasonable: false
+
