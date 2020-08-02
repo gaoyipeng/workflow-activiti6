@@ -3,15 +3,14 @@ package com.sxdx.workflow.activiti.rest.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.sxdx.common.config.GlobalConfig;
+import com.sxdx.common.util.Page;
 import com.sxdx.workflow.activiti.rest.service.ProcessHistoryService;
 import org.activiti.engine.HistoryService;
-import org.activiti.engine.history.HistoricActivityInstance;
-import org.activiti.engine.history.HistoricProcessInstance;
-import org.activiti.engine.history.HistoricTaskInstance;
-import org.activiti.engine.history.HistoricVariableInstance;
+import org.activiti.engine.history.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,7 +20,7 @@ public class ProcessHistoryServiceImpl implements ProcessHistoryService {
 
     @Override
     public List<HistoricTaskInstance> getHistoryTaskList(String finished,String processInstanceId) {
-        List<HistoricTaskInstance> list = null;
+        List<HistoricTaskInstance> list = new ArrayList<>();
         if (finished.equals("0")){
             list = historyService // 历史任务Service
                     .createHistoricTaskInstanceQuery() // 创建历史任务实例查询
@@ -52,7 +51,7 @@ public class ProcessHistoryServiceImpl implements ProcessHistoryService {
 
     @Override
     public List<HistoricActivityInstance> getHistoryActInstanceList(String finished, String processInstanceId) {
-        List<HistoricActivityInstance> list = null;
+        List<HistoricActivityInstance> list = new ArrayList<>();
         if (finished.equals("0")){
             list = historyService // 历史任务Service
                     .createHistoricActivityInstanceQuery()
@@ -80,7 +79,7 @@ public class ProcessHistoryServiceImpl implements ProcessHistoryService {
 
     @Override
     public List<HistoricVariableInstance> getHistoryProcessVariables( String processInstanceId) {
-        List<HistoricVariableInstance> list = null;
+        List<HistoricVariableInstance> list = new ArrayList<>();
         list = historyService
                 .createHistoricVariableInstanceQuery()//创建一个历史的流程变量查询对象
                 .processInstanceId(processInstanceId)//
@@ -89,26 +88,39 @@ public class ProcessHistoryServiceImpl implements ProcessHistoryService {
     }
 
     @Override
-    public PageInfo<HistoricProcessInstance> getFinishedInstanceList(String processDefinitionId,int pageNum, int pageSize) {
-        List<HistoricProcessInstance> list = null;
+    public Page getFinishedInstanceList(int pageNum, int pageSize,String processDefinitionId) {
+        List<HistoricProcessInstance> list = new ArrayList<>();
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery();
+        Page page = new Page(pageNum,pageSize);
 
-        PageHelper.startPage(pageNum, pageSize);
-        list = historyService.createHistoricProcessInstanceQuery()
-                .processDefinitionId(processDefinitionId)
-                .finished().list();
-        PageInfo<HistoricProcessInstance> pageAttachments = new PageInfo<>(list);
-        return pageAttachments;
+        if (processDefinitionId != null ) {
+            historicProcessInstanceQuery =  historicProcessInstanceQuery.processDefinitionId(processDefinitionId);
+        }
+        list = historicProcessInstanceQuery
+                .orderByProcessInstanceStartTime().asc()//排序
+                .finished()
+                .listPage(page.getFirstResult(),page.getMaxResults());
+
+        int total = (int) historicProcessInstanceQuery.count();
+        page.setTotal(total);
+        page.setList(list);
+        return page;
     }
 
     @Override
-    public PageInfo<HistoricProcessInstance> queryHistoricInstance(int pageNum, int pageSize) {
-        List<HistoricProcessInstance> list = null;
-
-        PageHelper.startPage(pageNum, pageSize);
-        list = historyService.createHistoricProcessInstanceQuery()
+    public Page queryHistoricInstance(int pageNum, int pageSize,String processDefinitionId) {
+        List<HistoricProcessInstance> list = new ArrayList<>();
+        HistoricProcessInstanceQuery historicProcessInstanceQuery = historyService.createHistoricProcessInstanceQuery();
+        Page page = new Page(pageNum,pageSize);
+        if (processDefinitionId != null ) {
+            historicProcessInstanceQuery =  historicProcessInstanceQuery.processDefinitionId(processDefinitionId);
+        }
+        list = historicProcessInstanceQuery
                 .orderByProcessInstanceStartTime().asc()//排序
-                .list();
-        PageInfo<HistoricProcessInstance> pageAttachments = new PageInfo<>(list);
-        return pageAttachments;
+                .listPage(page.getFirstResult(),page.getMaxResults());
+        int total = (int) historicProcessInstanceQuery.count();
+        page.setTotal(total);
+        page.setList(list);
+        return page;
     }
 }

@@ -3,6 +3,7 @@ package com.sxdx.workflow.activiti.rest.controller;
 import com.github.pagehelper.PageInfo;
 import com.sxdx.common.constant.CodeEnum;
 import com.sxdx.common.util.CommonResponse;
+import com.sxdx.common.util.Page;
 import com.sxdx.workflow.activiti.rest.service.ProcessHistoryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -57,23 +58,25 @@ public class ProcessHistoryController {
 
     @ApiOperation(value = "获取已归档的流程实例",notes = "获取已归档的流程实例")
     @GetMapping (value = "/getFinishedInstanceList")
-    public CommonResponse getFinishedInstanceList(@RequestParam(value = "processInstanceId", required = true)
+    public CommonResponse getFinishedInstanceList(@RequestParam(value = "processDefinitionId", required = true)
                                                       @ApiParam(value = "流程定义ID" ,required = true)String processDefinitionId,
                                                   @RequestParam(value = "pageNum", required = false,defaultValue = "1")
                                                     @ApiParam(value = "页码" ,required = false)int pageNum,
                                                   @RequestParam(value = "pageSize", required = false,defaultValue = "10")
                                                       @ApiParam(value = "条数" ,required = false)int pageSize){
-        PageInfo<HistoricProcessInstance> list = processHistoryService.getFinishedInstanceList(processDefinitionId,  pageNum,  pageSize);
+        Page list = processHistoryService.getFinishedInstanceList(pageNum,  pageSize,processDefinitionId);
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(list);
     }
 
-    @ApiOperation(value = "查询历史流程实例",notes = "查询历史流程实例（所有已发起的流程）")
+    @ApiOperation(value = "获取历史流程实例",notes = "获取历史流程实例（所有已发起的流程）")
     @GetMapping (value = "/queryHistoricInstance")
-    public CommonResponse queryHistoricInstance(@RequestParam(value = "pageNum", required = false,defaultValue = "1")
+    public CommonResponse queryHistoricInstance(@RequestParam(value = "processDefinitionId", required = true)
+                                                    @ApiParam(value = "流程定义ID" ,required = true)String processDefinitionId,
+                                                @RequestParam(value = "pageNum", required = false,defaultValue = "1")
                                                   @ApiParam(value = "页码" ,required = false)int pageNum,
-                                                  @RequestParam(value = "pageSize", required = false,defaultValue = "10")
+                                                @RequestParam(value = "pageSize", required = false,defaultValue = "10")
                                                   @ApiParam(value = "条数" ,required = false)int pageSize){
-        PageInfo<HistoricProcessInstance> list = processHistoryService.queryHistoricInstance( pageNum,  pageSize);
+        Page list = processHistoryService.queryHistoricInstance( pageNum,  pageSize,processDefinitionId);
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(list);
     }
 

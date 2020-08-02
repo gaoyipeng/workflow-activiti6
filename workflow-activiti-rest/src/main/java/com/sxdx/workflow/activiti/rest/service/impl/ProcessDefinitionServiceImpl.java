@@ -52,8 +52,12 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
         ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();//创建一个流程定义查询
         List<ProcessDefinition> processDefinitionList = null;
 
-        if (processDefinitionKey != null) processDefinitionQuery = processDefinitionQuery.processDefinitionKey(processDefinitionKey);//根据流程定义Key查询
-        if (processDefinitionName != null) processDefinitionQuery = processDefinitionQuery.processDefinitionNameLike(processDefinitionName);//根据流程定义name查询
+        if (processDefinitionKey != null) {
+            processDefinitionQuery = processDefinitionQuery.processDefinitionKey(processDefinitionKey);//根据流程定义Key查询
+        }
+        if (processDefinitionName != null) {
+            processDefinitionQuery = processDefinitionQuery.processDefinitionNameLike(processDefinitionName);//根据流程定义name查询
+        }
 
 
         processDefinitionQuery = processDefinitionQuery.orderByProcessDefinitionName().desc()//按照流程定义的名称降序排列
