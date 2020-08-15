@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sxdx.common.constant.CodeEnum;
 import com.sxdx.common.util.CommonResponse;
+import com.sxdx.common.util.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -16,6 +17,7 @@ import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.Model;
+import org.activiti.engine.repository.ModelQuery;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
+import java.util.List;
 
 import static org.activiti.editor.constants.ModelDataJsonConstants.MODEL_DESCRIPTION;
 import static org.activiti.editor.constants.ModelDataJsonConstants.MODEL_NAME;
@@ -34,13 +37,14 @@ import static org.activiti.editor.constants.ModelDataJsonConstants.MODEL_NAME;
 @Api(value="流程模型模块", description="流程模型模块")
 @RestController
 @Slf4j
+@RequestMapping(value = "/modeler")
 public class ModelerController {
 
     @Autowired
     private RepositoryService repositoryService;
 
     @ApiOperation(value = "创建模型",notes = "创建模型")
-    @PostMapping(value = "/modeler/create")
+    @PostMapping(value = "/create")
     public CommonResponse create(@RequestParam(value = "name",required=true) @ApiParam("模型名") String name,
                        @RequestParam(value = "key",required=true) @ApiParam("模型key")String key,
                        @RequestParam(value = "description",required=true) @ApiParam("模型描述")String description) {
@@ -82,7 +86,7 @@ public class ModelerController {
     }
 
 
-    @GetMapping(value = "/modeler/deploy/{modelId}")
+    @GetMapping(value = "/deploy/{modelId}")
     @ApiOperation(value = "根据 Model部署流程",notes = "流程模型（act_re_model）转流程定义（act_re_procdef）")
     public CommonResponse deploy(@PathVariable("modelId") @ApiParam("流程模型Id") String modelId) {
         try {
@@ -104,7 +108,7 @@ public class ModelerController {
     }
 
 
-    @GetMapping(value = "/modeler/export/{modelId}")
+    @GetMapping(value = "/export/{modelId}")
     @ApiOperation(value = "将流程模型导出为 bpmn文件",notes = "将流程模型导出为 bpmn文件")
     public void export(@PathVariable("modelId") @ApiParam("流程模型Id") String modelId, HttpServletResponse response) {
         try {
@@ -131,11 +135,30 @@ public class ModelerController {
         }
     }
 
-    @GetMapping(value = "/modeler/delete/{modelId}")
+    @GetMapping(value = "/delete/{modelId}")
     @ApiOperation(value = "删除流程模型",notes = "删除流程模型")
     public CommonResponse remove(@PathVariable("modelId") @ApiParam("流程模型Id") String modelId) {
        repositoryService.deleteModel(modelId);
        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("删除流程模型成功");
+    }
+
+    @GetMapping(value = "/modelList")
+    @ApiOperation(value = "获取流程模型列表",notes = "获取流程模型列表")
+    public CommonResponse getModelerList(@RequestParam(value = "pageNum", required = false,defaultValue = "1")
+                                   @ApiParam(value = "页码" ,required = false)int pageNum,
+                               @RequestParam(value = "pageSize", required = false,defaultValue = "10")
+                                   @ApiParam(value = "条数" ,required = false)int pageSize){
+        ModelQuery modelQuery = repositoryService.createModelQuery();
+        Page page = new Page(pageNum,pageSize);
+
+        List<Model> list = modelQuery.orderByCreateTime().desc()
+                                    .listPage(page.getFirstResult(),page.getMaxResults());
+
+        int total = (int) modelQuery.count();
+        page.setTotal(total);
+        page.setList(list);
+
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("获取流程模型列表成功").data(page);
     }
 
 }

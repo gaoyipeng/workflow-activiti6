@@ -1,5 +1,6 @@
 package com.sxdx.workflow.activiti.rest.service;
 
+import com.sxdx.common.util.Page;
 import com.sxdx.workflow.activiti.rest.entity.Leave;
 import com.baomidou.mybatisplus.extension.service.IService;
 import io.swagger.annotations.ApiParam;
@@ -19,6 +20,6 @@ import java.util.List;
  */
 public interface ILeaveService extends IService<Leave> {
     Leave startForm(Leave leave);
-    List<Leave> getTodoList(String processDefinitionKey, HttpServletRequest request);
+    Page getTodoList(String processDefinitionKey, int pageNum, int pageSize);
     List<Leave> getAll();
 }

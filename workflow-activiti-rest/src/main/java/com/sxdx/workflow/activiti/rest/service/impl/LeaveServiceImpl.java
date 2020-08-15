@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.sxdx.common.config.GlobalConfig;
+import com.sxdx.common.util.Page;
 import com.sxdx.workflow.activiti.rest.entity.Leave;
 import com.sxdx.workflow.activiti.rest.mapper.LeaveMapper;
 import com.sxdx.workflow.activiti.rest.service.ILeaveService;
@@ -17,6 +18,7 @@ import org.activiti.engine.impl.UserQueryImpl;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,17 +75,20 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
 
     @Transactional(readOnly = true)
     @Override
-    public List<Leave> getTodoList(String processDefinitionKey, HttpServletRequest request) {
+    public Page getTodoList(String processDefinitionKey, int pageNum,int pageSize) {
         List<Leave> results = new ArrayList<Leave>();
 
-        //TODO 此处应该添加获取当前操作人的代码,先写死用 leaderuser。
         UserQueryImpl user = new UserQueryImpl();
         user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
 
         List<Task> tasks = new ArrayList<Task>();
 
-        tasks = taskService.createTaskQuery().processDefinitionKey(processDefinitionKey)
-                .taskCandidateOrAssigned(user.getId()).active().orderByTaskId().desc().list();
+        Page page = new Page(pageNum,pageSize);
+        TaskQuery taskQuery = taskService.createTaskQuery();
+
+        tasks = taskQuery.processDefinitionKey(processDefinitionKey)
+                .taskCandidateOrAssigned(user.getId()).active().orderByTaskId().desc()
+                .listPage(page.getFirstResult(),page.getMaxResults());
 
         // 根据流程的业务ID查询实体并关联
         for (Task task : tasks) {
@@ -104,7 +109,11 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
             leave.setProcessDefinition(BeanUtil.beanToMap(processDefinition));
             results.add(leave);
         }
-        return results;
+
+        int total = (int) taskQuery.count();
+        page.setTotal(total);
+        page.setList(results);
+        return page;
     }
 
 

@@ -2,6 +2,7 @@ package com.sxdx.workflow.activiti.rest.service.impl;
 
 import com.sxdx.common.config.GlobalConfig;
 import com.sxdx.common.exception.base.CommonException;
+import com.sxdx.common.util.Page;
 import com.sxdx.workflow.activiti.rest.config.ICustomProcessDiagramGenerator;
 import com.sxdx.workflow.activiti.rest.config.WorkflowConstants;
 import com.sxdx.workflow.activiti.rest.service.ProcessService;
@@ -24,6 +25,7 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
+import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -242,21 +244,28 @@ public class ProcessServiceImpl implements ProcessService {
     }
 
     @Override
-    public List<Task> taskList(String processDefinitionKey, HttpServletRequest request) {
+    public Page taskList(String processDefinitionKey, int pageNum,int pageSize) {
+        Page page = new Page(pageNum,pageSize);
 
-        //TODO 此处应该添加获取当前操作人的代码,先写死用 leaderuser。
         UserQueryImpl user = new UserQueryImpl();
         user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
 
         List<Task> tasks = new ArrayList<Task>();
+        TaskQuery taskQuery = taskService.createTaskQuery();
 
         if (!StringUtils.equals(processDefinitionKey, "all")) {
-            tasks = taskService.createTaskQuery().processDefinitionKey(processDefinitionKey)
-                    .taskCandidateOrAssigned(user.getId()).active().orderByTaskId().desc().list();
+            tasks = taskQuery.processDefinitionKey(processDefinitionKey)
+                    .taskCandidateOrAssigned(user.getId()).active().orderByTaskId().desc()
+                    .listPage(page.getFirstResult(),page.getMaxResults());
         } else {
-            tasks = taskService.createTaskQuery().taskCandidateOrAssigned(user.getId()).active().orderByTaskId().desc().list();
+            tasks = taskQuery.taskCandidateOrAssigned(user.getId()).active().orderByTaskId().desc()
+                    .listPage(page.getFirstResult(),page.getMaxResults());
         }
-        return tasks;
+        //获取总页数
+        int total = (int) taskQuery.count();
+        page.setTotal(total);
+        page.setList(tasks);
+        return page;
     }
 
     @Override

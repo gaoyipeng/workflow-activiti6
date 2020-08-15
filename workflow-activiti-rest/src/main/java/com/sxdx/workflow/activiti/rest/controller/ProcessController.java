@@ -5,6 +5,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.sxdx.common.constant.CodeEnum;
 import com.sxdx.common.exception.base.CommonException;
 import com.sxdx.common.util.CommonResponse;
+import com.sxdx.common.util.Page;
 import com.sxdx.workflow.activiti.rest.config.ICustomProcessDiagramGenerator;
 import com.sxdx.workflow.activiti.rest.config.WorkflowConstants;
 import com.sxdx.workflow.activiti.rest.service.ProcessService;
@@ -68,14 +69,19 @@ public class ProcessController  {
 
     @PostMapping(value = "/task/list")
     @ApiOperation(value = "获取当前人员待办列表",notes = "获取当前人员待办列表,如果要查询所有，则传all")
-    public CommonResponse taskList(@RequestParam(value = "processDefinitionKey", required = true) @ApiParam("流程定义KEY(act_re_procdef表KEY)")String processDefinitionKey, HttpServletRequest request) {
-        List<Task> taskList = processService.taskList(processDefinitionKey, request);
+    public CommonResponse taskList(@RequestParam(value = "processDefinitionKey", required = true,defaultValue = "all") @ApiParam("流程定义KEY(act_re_procdef表KEY)")String processDefinitionKey,
+                                   HttpServletRequest request,
+                                   @RequestParam(value = "pageNum", required = false,defaultValue = "1")@ApiParam(value = "页码" ,required = false)int pageNum,
+                                   @RequestParam(value = "pageSize", required = false,defaultValue = "10")@ApiParam(value = "条数" ,required = false)int pageSize) {
+        Page page = processService.taskList(processDefinitionKey, pageNum,pageSize);
 
         List<Map<String, Object>> customTaskList = new ArrayList<>();
+        List<Task> taskList = (List<Task>) page.getList();
         for (Task task : taskList) {
             customTaskList.add(BeanUtil.beanToMap(task));
         }
-        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("获取当前人员待办列表成功").data(customTaskList);
+        page.setList(customTaskList);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("获取当前人员待办列表成功").data(page);
     }
 
 

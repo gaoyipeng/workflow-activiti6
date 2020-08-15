@@ -21,7 +21,7 @@ public class Page {
     private int maxResults;
 
     //结果集
-    private List list;
+    private Object list;
 
     public Page(int pageNum, int pageSize) {
         this.pageNum = pageNum;

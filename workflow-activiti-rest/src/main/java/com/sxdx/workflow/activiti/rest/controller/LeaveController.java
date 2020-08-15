@@ -3,6 +3,7 @@ package com.sxdx.workflow.activiti.rest.controller;
 
 import com.sxdx.common.constant.CodeEnum;
 import com.sxdx.common.util.CommonResponse;
+import com.sxdx.common.util.Page;
 import com.sxdx.workflow.activiti.rest.entity.Leave;
 import com.sxdx.workflow.activiti.rest.service.ILeaveService;
 import com.sxdx.workflow.activiti.rest.service.NormalFormService;
@@ -61,8 +62,11 @@ public class LeaveController {
     @ApiOperation(value = "获取当前人员待办业务数据",notes = "获取当前人员待办业务数据")
     @ResponseBody
     public CommonResponse getTodoList(@RequestParam(value = "processDefinitionKey", required = true) @ApiParam("流程定义Id(act_re_procdef表KEY)")String processDefinitionKey,
-                                       HttpServletRequest request){
-        List<Leave> todoList = leaveService.getTodoList(processDefinitionKey, request);
-        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(todoList);
+                                      @RequestParam(value = "pageNum", required = false,defaultValue = "1")
+                                      @ApiParam(value = "页码" ,required = false)int pageNum,
+                                      @RequestParam(value = "pageSize", required = false,defaultValue = "10")
+                                          @ApiParam(value = "条数" ,required = false)int pageSize){
+        Page page = leaveService.getTodoList(processDefinitionKey, pageNum,pageSize);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(page);
     }
 }
