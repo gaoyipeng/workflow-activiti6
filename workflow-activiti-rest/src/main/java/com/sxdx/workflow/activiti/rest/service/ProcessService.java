@@ -20,4 +20,5 @@ public interface ProcessService {
     void claim(String taskId, HttpServletRequest request);
     void completeTask(String taskId,HttpServletRequest request);
     ProcessInstance submitStartFormAndStartProcessInstance(String processDefinitionId, HttpServletRequest request) throws CommonException;
+    ProcessInstance messageStartEventInstance(String message, HttpServletRequest request) throws CommonException;
 }

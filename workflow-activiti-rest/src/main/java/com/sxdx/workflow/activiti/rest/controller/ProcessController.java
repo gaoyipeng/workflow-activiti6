@@ -60,7 +60,7 @@ public class ProcessController  {
     @Autowired
     private ProcessService processService;
 
-    @GetMapping(value = "/read-resource/{pProcessInstanceId}")
+    @GetMapping(value = "/readResource/{pProcessInstanceId}")
     @ApiOperation(value = "获取实时流程图",notes = "获取实时流程图,输出跟踪流程信息")
     public void readResource(@PathVariable("pProcessInstanceId") @ApiParam("流程实例ID (act_hi_procinst表id)") String pProcessInstanceId, HttpServletResponse response)
             throws Exception {
@@ -111,11 +111,22 @@ public class ProcessController  {
     /**
      * 提交启动流程
      */
-    @PostMapping(value = "/start-process/{processDefinitionId}")
+    @PostMapping(value = "/startProcess/{processDefinitionId}")
     @ApiOperation(value = "提交启动流程",notes = "提交启动流程，key需要以fp_开头")
-    public CommonResponse submitStartFormAndStartProcessInstance(@PathVariable("processDefinitionId") @ApiParam("act_re_procdef表id")String processDefinitionId,
+    public CommonResponse submitStartFormAndStartProcessInstance(@PathVariable( value = "processDefinitionId",required = true) @ApiParam(name = "act_re_procdef表id",required = true)String processDefinitionId,
                                                                  HttpServletRequest request) throws CommonException {
         ProcessInstance processInstance = processService.submitStartFormAndStartProcessInstance(processDefinitionId,request);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("流程启动成功，流程ID：" + processInstance.getId()).data(processInstance.getId());
+    }
+
+    /**
+     * 消息启动流程
+     */
+    @PostMapping(value = "/messageStartEventInstance/{messageId}")
+    @ApiOperation(value = "消息启动流程",notes = "发起启动节点是消息启动类型的流程，key需要以fp_开头")
+    public CommonResponse messageStartEventInstance(@PathVariable("messageId") @ApiParam("消息定义的编号")String messageId,
+                                                                 HttpServletRequest request) throws CommonException {
+        ProcessInstance processInstance = processService.messageStartEventInstance(messageId,request);
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("流程启动成功，流程ID：" + processInstance.getId()).data(processInstance.getId());
     }
 
