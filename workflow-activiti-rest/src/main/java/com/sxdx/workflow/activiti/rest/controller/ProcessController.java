@@ -130,5 +130,16 @@ public class ProcessController  {
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("流程启动成功，流程ID：" + processInstance.getId()).data(processInstance.getId());
     }
 
+    /**
+     * 信号启动流程
+     */
+    @PostMapping(value = "/signalStartEventInstance/{signalId}")
+    @ApiOperation(value = "信号启动流程",notes = "发起启动节点是信号启动类型的流程，key需要以fp_开头")
+    public CommonResponse signalStartEventInstance(@PathVariable("signalId") @ApiParam("信号定义的编号")String signalId,
+                                                    HttpServletRequest request) throws CommonException {
+        processService.signalStartEventInstance(signalId,request);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("信号启动流程成功");
+    }
+
 
 }

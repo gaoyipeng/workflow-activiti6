@@ -351,6 +351,13 @@ public class ProcessServiceImpl implements ProcessService {
         return processInstance;
     }
 
+    /**
+     * 消息启动流程
+     * @param message
+     * @param request
+     * @return
+     * @throws CommonException
+     */
     @Override
     public ProcessInstance messageStartEventInstance(String message, HttpServletRequest request) throws CommonException {
         Map<String, Object> formProperties = new HashMap<String, Object>();
@@ -382,5 +389,42 @@ public class ProcessServiceImpl implements ProcessService {
             identityService.setAuthenticatedUserId(null);
         }
         return processInstance;
+    }
+
+    /**
+     * 信号启动流程
+     * @param signalId
+     * @param request
+     * @return
+     * @throws CommonException
+     */
+    @Override
+    public void signalStartEventInstance(String signalId, HttpServletRequest request) throws CommonException {
+        Map<String, Object> formProperties = new HashMap<String, Object>();
+        // 从request中读取参数然后转换
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        if (parameterMap.size()>0){
+            Set<Map.Entry<String, String[]>> entrySet = parameterMap.entrySet();
+            for (Map.Entry<String, String[]> entry : entrySet) {
+                String key = entry.getKey();
+                // fp_的意思是form paremeter
+                if (StringUtils.defaultString(key).startsWith("fp_")) {
+                    formProperties.put(key.split("_")[1], entry.getValue()[0]);
+                }
+            }
+        }
+
+        log.debug("start form parameters: {}", formProperties);
+
+        UserQueryImpl user = new UserQueryImpl();
+        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+
+        ProcessInstance processInstance = null;
+        try {
+            //identityService.setAuthenticatedUserId(user.getId());
+            runtimeService.signalEventReceived(signalId,formProperties);
+        } finally {
+            //identityService.setAuthenticatedUserId(null);
+        }
     }
 }
