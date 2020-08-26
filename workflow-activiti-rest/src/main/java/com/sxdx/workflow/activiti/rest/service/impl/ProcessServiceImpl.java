@@ -330,9 +330,9 @@ public class ProcessServiceImpl implements ProcessService {
                     formProperties.put(key.split("_")[1], entry.getValue()[0]);
                 }
             }
-        }else {
+        }/*else {
             throw new CommonException("表单数据为空");
-        }
+        }*/
 
         log.debug("start form parameters: {}", formProperties);
 
