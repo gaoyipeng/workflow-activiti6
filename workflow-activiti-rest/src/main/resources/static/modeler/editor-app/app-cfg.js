@@ -22,4 +22,5 @@ var ACTIVITI = ACTIVITI || {};
 
 ACTIVITI.CONFIG = {
 	'contextRoot' : '/modeler',
+	'activitiRoot' : '',
 };
