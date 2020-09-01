@@ -1,6 +1,7 @@
 package com.sxdx.workflow.activiti.rest.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.sxdx.common.exception.base.CommonException;
 import com.sxdx.common.util.Page;
 import com.sxdx.common.util.StringUtils;
 import com.sxdx.workflow.activiti.rest.service.ProcessDefinitionService;
@@ -54,8 +55,7 @@ public class ProcessDefinitionServiceImpl implements ProcessDefinitionService {
 
         if (processDefinitionKey != null) {
             processDefinitionQuery = processDefinitionQuery.processDefinitionKey(processDefinitionKey);//根据流程定义Key查询
-        }
-        if (processDefinitionName != null) {
+        }else if (processDefinitionName != null) {
             processDefinitionQuery = processDefinitionQuery.processDefinitionNameLike(processDefinitionName);//根据流程定义name查询
         }
 

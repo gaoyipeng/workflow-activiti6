@@ -71,7 +71,7 @@ public class ProcessHistoryController {
     @ApiOperation(value = "获取历史流程实例",notes = "获取历史流程实例（所有已发起的流程）")
     @GetMapping (value = "/queryHistoricInstance")
     public CommonResponse queryHistoricInstance(@RequestParam(value = "processDefinitionId", required = true)
-                                                    @ApiParam(value = "流程定义ID" ,required = true)String processDefinitionId,
+                                                    @ApiParam(value = "流程定义ID(act_re_procdef表ID)" ,required = true)String processDefinitionId,
                                                 @RequestParam(value = "pageNum", required = false,defaultValue = "1")
                                                   @ApiParam(value = "页码" ,required = false)int pageNum,
                                                 @RequestParam(value = "pageSize", required = false,defaultValue = "10")

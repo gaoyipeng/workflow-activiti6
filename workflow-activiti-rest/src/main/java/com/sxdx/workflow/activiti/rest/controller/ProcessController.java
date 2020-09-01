@@ -131,14 +131,28 @@ public class ProcessController  {
     }
 
     /**
-     * 信号启动流程
+     * 信号触发
      */
-    @PostMapping(value = "/signalStartEventInstance/{signalId}")
-    @ApiOperation(value = "信号启动流程",notes = "发起启动节点是信号启动类型的流程，key需要以fp_开头")
-    public CommonResponse signalStartEventInstance(@PathVariable("signalId") @ApiParam("信号定义的编号")String signalId,
-                                                    HttpServletRequest request) throws CommonException {
-        processService.signalStartEventInstance(signalId,request);
-        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("信号启动流程成功");
+    @PostMapping(value = "/signalStartEventInstance/{signalName}")
+    @ApiOperation(value = "信号触发",notes = "可以用来发起启动节点是信号启动类型的流程，也可以用来触发信号边界事件，表单元素key需要以fp_开头")
+    public CommonResponse signalStartEventInstance(@PathVariable(value = "signalName",required = true) @ApiParam(value = "信号定义的编号",required = true)String signalName,
+                                                   @RequestParam(value = "executionId",required = false) @ApiParam(value = "执行ID",required = false)String executionId,
+                                                   HttpServletRequest request) {
+        processService.signalStartEventInstance(signalName,executionId,request);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("信号触发成功");
+    }
+
+    /**
+     * 获取信号事件的执行列表
+     */
+    @PostMapping(value = "/getSignalEventSubscription/{processInstanceId}/{signalName}")
+    @ApiOperation(value = "获取某一信号事件的所有执行",notes = "获取某一信号事件的所有执行")
+    public CommonResponse signalEventSubscriptionName(@RequestParam(value = "pageNum", required = true,defaultValue = "1")@ApiParam(value = "页码" ,required = true)int pageNum,
+                                                      @RequestParam(value = "pageSize", required = true,defaultValue = "10")@ApiParam(value = "条数" ,required = true)int pageSize,
+                                                      @PathVariable(value ="processInstanceId", required = true) @ApiParam(value = "流程实例",required = false)String processInstanceId,
+                                                      @PathVariable(value ="signalName", required = true) @ApiParam(value = "信号定义的编号",required = true)String signalName)  {
+        Page page = processService.signalEventSubscriptionName(pageNum, pageSize, signalName, processInstanceId);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(page);
     }
 
 

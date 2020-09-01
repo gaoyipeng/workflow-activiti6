@@ -1,28 +1,28 @@
 package com.sxdx.workflow.activiti.rest.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.sxdx.common.config.GlobalConfig;
 import com.sxdx.common.exception.base.CommonException;
 import com.sxdx.common.util.Page;
 import com.sxdx.workflow.activiti.rest.config.ICustomProcessDiagramGenerator;
 import com.sxdx.workflow.activiti.rest.config.WorkflowConstants;
+import com.sxdx.workflow.activiti.rest.entity.vo.AcExecutionEntityImpl;
 import com.sxdx.workflow.activiti.rest.service.ProcessService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.bpmn.model.FlowNode;
 import org.activiti.bpmn.model.SequenceFlow;
 import org.activiti.engine.*;
-import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricProcessInstance;
-import org.activiti.engine.identity.User;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.UserQueryImpl;
-import org.activiti.engine.impl.form.TaskFormDataImpl;
+import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
+import org.activiti.engine.runtime.Execution;
+import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
@@ -31,16 +31,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -392,14 +388,14 @@ public class ProcessServiceImpl implements ProcessService {
     }
 
     /**
-     * 信号启动流程
-     * @param signalId
+     * 信号触发
+     * @param signalName
+     * @param executionId
      * @param request
-     * @return
      * @throws CommonException
      */
     @Override
-    public void signalStartEventInstance(String signalId, HttpServletRequest request) throws CommonException {
+    public void signalStartEventInstance(String signalName,  String executionId ,HttpServletRequest request)  {
         Map<String, Object> formProperties = new HashMap<String, Object>();
         // 从request中读取参数然后转换
         Map<String, String[]> parameterMap = request.getParameterMap();
@@ -419,12 +415,63 @@ public class ProcessServiceImpl implements ProcessService {
         UserQueryImpl user = new UserQueryImpl();
         user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
 
-        ProcessInstance processInstance = null;
-        try {
-            //identityService.setAuthenticatedUserId(user.getId());
-            runtimeService.signalEventReceived(signalId,formProperties);
-        } finally {
-            //identityService.setAuthenticatedUserId(null);
+        if (!executionId.isEmpty() && formProperties.size() > 0){
+            runtimeService.signalEventReceived(signalName,executionId,formProperties);
+        }else if(!executionId.isEmpty()){
+            runtimeService.signalEventReceived(signalName,executionId);
+        }else{
+            runtimeService.signalEventReceived(signalName);
         }
     }
+
+    /**
+     * 获取信号事件的执行列表
+     * @param pageNum
+     * @param pageSize
+     * @param signalName
+     * @param processInstanceId
+     * @return
+     * @throws CommonException
+     */
+    @Override
+    public Page signalEventSubscriptionName(int pageNum, int pageSize, String signalName,String processInstanceId)  {
+        Page page = new Page(pageNum,pageSize);
+
+        UserQueryImpl user = new UserQueryImpl();
+        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+
+        List<AcExecutionEntityImpl> Acexecutions = new ArrayList<AcExecutionEntityImpl>();
+
+        ExecutionQuery executionQuery = runtimeService.createExecutionQuery();
+        if (!processInstanceId.isEmpty()){
+            executionQuery = executionQuery.processInstanceId(processInstanceId);
+        }
+
+        List<Execution> executions = executionQuery
+                .signalEventSubscriptionName(signalName)
+                .listPage(page.getFirstResult(),page.getMaxResults());
+
+        for (int i = 0; i <executions.size(); i++) {
+            ExecutionEntityImpl execution = (ExecutionEntityImpl) executions.get(i);
+            AcExecutionEntityImpl acExecutionEntity = new AcExecutionEntityImpl();
+
+            acExecutionEntity.setId(execution.getId());
+            acExecutionEntity.setActivitiId(execution.getActivityId());
+            acExecutionEntity.setActivitiName(execution.getActivityName());
+            acExecutionEntity.setParentId(execution.getParentId());
+            acExecutionEntity.setProcessDefinitionId(execution.getProcessDefinitionId());
+            acExecutionEntity.setProcessDefinitionKey(execution.getProcessDefinitionKey());
+            acExecutionEntity.setRootProcessInstanceId(execution.getRootProcessInstanceId());
+            acExecutionEntity.setProcessInstanceId(execution.getProcessInstanceId());
+            Acexecutions.add(acExecutionEntity);
+        }
+
+        //获取总页数
+        int total = (int) executionQuery.count();
+        page.setTotal(total);
+        page.setList(Acexecutions);
+        return page;
+    }
+
+
 }
