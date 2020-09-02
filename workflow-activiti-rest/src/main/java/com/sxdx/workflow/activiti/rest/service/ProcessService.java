@@ -25,4 +25,5 @@ public interface ProcessService {
     void messageEventReceived(String messageName, String executionId ,HttpServletRequest request) ;
     Page signalEventSubscriptionName(int pageNum, int pageSize, String signalName,String processInstanceId) ;
     Page messageEventSubscriptionName(int pageNum, int pageSize, String messageName,String processInstanceId) ;
+    void deleteProcessInstance(String processInstanceId,String deleteReason);
 }

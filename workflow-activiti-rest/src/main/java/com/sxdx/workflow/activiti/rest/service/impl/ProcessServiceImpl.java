@@ -555,5 +555,15 @@ public class ProcessServiceImpl implements ProcessService {
         return page;
     }
 
+    /**
+     * 删除流程实例
+     * @param processInstanceId
+     * @param deleteReason
+     */
+    @Override
+    public void deleteProcessInstance(String processInstanceId, String deleteReason) {
+        runtimeService.deleteProcessInstance(processInstanceId,deleteReason);
+    }
+
 
 }

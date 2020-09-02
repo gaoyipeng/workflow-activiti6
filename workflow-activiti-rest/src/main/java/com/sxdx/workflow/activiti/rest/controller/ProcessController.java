@@ -181,5 +181,13 @@ public class ProcessController  {
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(page);
     }
 
+    @DeleteMapping (value = "/deleteProcessInstance")
+    @ApiOperation(value = "删除流程实例",notes = "删除流程实例")
+    public CommonResponse deleteProcessInstance(@RequestParam(value = "processInstanceId", required = true)@ApiParam(value = "流程实例Id" ,required = true)String processInstanceId,
+                                      @RequestParam(value = "deleteReason", required = false,defaultValue = "")@ApiParam(value = "原因" ,required = false)String deleteReason){
+        processService.deleteProcessInstance(processInstanceId,deleteReason);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("删除流程实例成功");
+    }
+
 
 }
