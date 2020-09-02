@@ -20,8 +20,9 @@ public interface ProcessService {
     void claim(String taskId, HttpServletRequest request);
     void completeTask(String taskId,HttpServletRequest request);
     ProcessInstance submitStartFormAndStartProcessInstance(String processDefinitionId, HttpServletRequest request) throws CommonException;
-    ProcessInstance messageStartEventInstance(String messageId, HttpServletRequest request) throws CommonException;
+    ProcessInstance messageStartEventInstance(String messageName, HttpServletRequest request) throws CommonException;
     void signalStartEventInstance(String signalName, String executionId ,HttpServletRequest request) ;
+    void messageEventReceived(String messageName, String executionId ,HttpServletRequest request) ;
     Page signalEventSubscriptionName(int pageNum, int pageSize, String signalName,String processInstanceId) ;
-
+    Page messageEventSubscriptionName(int pageNum, int pageSize, String messageName,String processInstanceId) ;
 }

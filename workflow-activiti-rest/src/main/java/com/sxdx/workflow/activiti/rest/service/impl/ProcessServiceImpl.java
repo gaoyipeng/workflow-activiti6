@@ -349,13 +349,13 @@ public class ProcessServiceImpl implements ProcessService {
 
     /**
      * 消息启动流程
-     * @param message
+     * @param messageName
      * @param request
      * @return
      * @throws CommonException
      */
     @Override
-    public ProcessInstance messageStartEventInstance(String message, HttpServletRequest request) throws CommonException {
+    public ProcessInstance messageStartEventInstance(String messageName, HttpServletRequest request) throws CommonException {
         Map<String, Object> formProperties = new HashMap<String, Object>();
         // 从request中读取参数然后转换
         Map<String, String[]> parameterMap = request.getParameterMap();
@@ -378,7 +378,7 @@ public class ProcessServiceImpl implements ProcessService {
         ProcessInstance processInstance = null;
         try {
             identityService.setAuthenticatedUserId(user.getId());
-            processInstance = runtimeService.startProcessInstanceByMessage(message,formProperties);
+            processInstance = runtimeService.startProcessInstanceByMessage(messageName,formProperties);
 
             log.debug("start a processinstance: {}", processInstance);
         } finally {
@@ -425,6 +425,40 @@ public class ProcessServiceImpl implements ProcessService {
     }
 
     /**
+     * 消息触发
+     * @param messageName
+     * @param executionId
+     * @param request
+     */
+    @Override
+    public void messageEventReceived(String messageName, String executionId, HttpServletRequest request) {
+        Map<String, Object> formProperties = new HashMap<String, Object>();
+        // 从request中读取参数然后转换
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        if (parameterMap.size()>0){
+            Set<Map.Entry<String, String[]>> entrySet = parameterMap.entrySet();
+            for (Map.Entry<String, String[]> entry : entrySet) {
+                String key = entry.getKey();
+                // fp_的意思是form paremeter
+                if (StringUtils.defaultString(key).startsWith("fp_")) {
+                    formProperties.put(key.split("_")[1], entry.getValue()[0]);
+                }
+            }
+        }
+
+        log.debug("start form parameters: {}", formProperties);
+
+        UserQueryImpl user = new UserQueryImpl();
+        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+
+        if (!executionId.isEmpty() && formProperties.size() > 0){
+            runtimeService.messageEventReceived(messageName,executionId,formProperties);
+        }else if(!executionId.isEmpty()){
+            runtimeService.messageEventReceived(messageName,executionId);
+        }
+    }
+
+    /**
      * 获取信号事件的执行列表
      * @param pageNum
      * @param pageSize
@@ -449,6 +483,54 @@ public class ProcessServiceImpl implements ProcessService {
 
         List<Execution> executions = executionQuery
                 .signalEventSubscriptionName(signalName)
+                .listPage(page.getFirstResult(),page.getMaxResults());
+
+        for (int i = 0; i <executions.size(); i++) {
+            ExecutionEntityImpl execution = (ExecutionEntityImpl) executions.get(i);
+            AcExecutionEntityImpl acExecutionEntity = new AcExecutionEntityImpl();
+
+            acExecutionEntity.setId(execution.getId());
+            acExecutionEntity.setActivitiId(execution.getActivityId());
+            acExecutionEntity.setActivitiName(execution.getActivityName());
+            acExecutionEntity.setParentId(execution.getParentId());
+            acExecutionEntity.setProcessDefinitionId(execution.getProcessDefinitionId());
+            acExecutionEntity.setProcessDefinitionKey(execution.getProcessDefinitionKey());
+            acExecutionEntity.setRootProcessInstanceId(execution.getRootProcessInstanceId());
+            acExecutionEntity.setProcessInstanceId(execution.getProcessInstanceId());
+            Acexecutions.add(acExecutionEntity);
+        }
+
+        //获取总页数
+        int total = (int) executionQuery.count();
+        page.setTotal(total);
+        page.setList(Acexecutions);
+        return page;
+    }
+
+    /**
+     * 获取消息事件的执行列表
+     * @param pageNum
+     * @param pageSize
+     * @param messageName
+     * @param processInstanceId
+     * @return
+     */
+    @Override
+    public Page messageEventSubscriptionName(int pageNum, int pageSize, String messageName, String processInstanceId) {
+        Page page = new Page(pageNum,pageSize);
+
+        UserQueryImpl user = new UserQueryImpl();
+        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+
+        List<AcExecutionEntityImpl> Acexecutions = new ArrayList<AcExecutionEntityImpl>();
+
+        ExecutionQuery executionQuery = runtimeService.createExecutionQuery();
+        if (!processInstanceId.isEmpty()){
+            executionQuery = executionQuery.processInstanceId(processInstanceId);
+        }
+
+        List<Execution> executions = executionQuery
+                .messageEventSubscriptionName(messageName)
                 .listPage(page.getFirstResult(),page.getMaxResults());
 
         for (int i = 0; i <executions.size(); i++) {
