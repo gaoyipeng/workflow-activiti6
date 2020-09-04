@@ -1282,7 +1282,7 @@
 
     "properties" : [ {
 
-      "id" : "isforcompensation",
+      "id" : "isForCompensation",
 
       "type" : "Boolean",
 
