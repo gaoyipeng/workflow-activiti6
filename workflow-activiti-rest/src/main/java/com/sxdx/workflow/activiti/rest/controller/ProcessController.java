@@ -147,7 +147,7 @@ public class ProcessController  {
      * 可以用来发起启动节点是信号启动类型的流程，也可以用来触发信号边界事件，表单元素key需要以fp_开头
      */
     @PostMapping(value = "/signalStartEventInstance/{signalName}")
-    @ApiOperation(value = "信号触发",notes = "可以用来发起启动节点是信号启动类型的流程，也可以用来触发信号边界事件，表单元素key需要以fp_开头")
+    @ApiOperation(value = "信号触发",notes = "可以用来发起启动节点是信号启动类型的流程，也可以用来触发信号边界事件、中间信号捕获事件，表单元素key需要以fp_开头")
     public CommonResponse signalStartEventInstance(@PathVariable(value = "signalName",required = true) @ApiParam(value = "信号定义的名称",required = true)String signalName,
                                                    @RequestParam(value = "executionId",required = false) @ApiParam(value = "执行ID",required = false)String executionId,
                                                    HttpServletRequest request) {
@@ -162,7 +162,7 @@ public class ProcessController  {
     @ApiOperation(value = "获取某一信号事件的所有执行",notes = "获取某一信号事件的所有执行")
     public CommonResponse signalEventSubscriptionName(@RequestParam(value = "pageNum", required = true,defaultValue = "1")@ApiParam(value = "页码" ,required = true)int pageNum,
                                                       @RequestParam(value = "pageSize", required = true,defaultValue = "10")@ApiParam(value = "条数" ,required = true)int pageSize,
-                                                      @PathVariable(value ="processInstanceId", required = false) @ApiParam(value = "流程实例",required = false)String processInstanceId,
+                                                      @PathVariable(value ="processInstanceId", required = true) @ApiParam(value = "流程实例",required = true)String processInstanceId,
                                                       @PathVariable(value ="signalName", required = true) @ApiParam(value = "信号定义的名称",required = true)String signalName)  {
         Page page = processService.signalEventSubscriptionName(pageNum, pageSize, signalName, processInstanceId);
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(page);
@@ -175,7 +175,7 @@ public class ProcessController  {
     @ApiOperation(value = "获取某一消息事件的所有执行",notes = "获取某一消息事件的所有执行")
     public CommonResponse messageEventSubscriptionName(@RequestParam(value = "pageNum", required = true,defaultValue = "1")@ApiParam(value = "页码" ,required = true)int pageNum,
                                                       @RequestParam(value = "pageSize", required = true,defaultValue = "10")@ApiParam(value = "条数" ,required = true)int pageSize,
-                                                      @PathVariable(value ="processInstanceId", required = false) @ApiParam(value = "流程实例",required = false)String processInstanceId,
+                                                      @PathVariable(value ="processInstanceId", required = true) @ApiParam(value = "流程实例",required = true)String processInstanceId,
                                                       @PathVariable(value ="messageName", required = true) @ApiParam(value = "消息定义的名称",required = true)String messageName)  {
         Page page = processService.messageEventSubscriptionName(pageNum, pageSize, messageName, processInstanceId);
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(page);
