@@ -4,6 +4,7 @@ package com.sxdx.workflow.activiti.rest.service;
 import com.sxdx.common.exception.base.CommonException;
 import com.sxdx.common.util.Page;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -16,9 +17,10 @@ import java.util.Map;
 
 public interface ProcessService {
     void readResource(String pProcessInstanceId, HttpServletResponse response) throws Exception ;
+    void image(String pProcessInstanceId, HttpServletResponse response) throws Exception ;
     Page taskList(String processDefinitionKey, int pageNum, int pageSize);
     void claim(String taskId, HttpServletRequest request);
-    void completeTask(String taskId,HttpServletRequest request);
+    void completeTask(String taskId, String processInstanceId,String comment,String type,HttpServletRequest request);
     ProcessInstance submitStartFormAndStartProcessInstance(String processDefinitionId, HttpServletRequest request) throws CommonException;
     ProcessInstance messageStartEventInstance(String messageName, HttpServletRequest request) throws CommonException;
     void signalStartEventInstance(String signalName, String executionId ,HttpServletRequest request) ;

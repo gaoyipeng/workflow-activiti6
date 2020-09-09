@@ -30,6 +30,7 @@ import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +68,13 @@ public class ProcessController  {
         processService.readResource(pProcessInstanceId,response);
     }
 
+    @GetMapping(value = "/image/{pProcessInstanceId}")
+    @ApiOperation(value = "获取实时流程图",notes = "获取实时流程图,输出跟踪流程信息")
+    public void image(@PathVariable("pProcessInstanceId") @ApiParam("流程实例ID (act_hi_procinst表id)") String pProcessInstanceId, HttpServletResponse response)
+            throws Exception {
+        processService.image(pProcessInstanceId,response);
+    }
+
     @PostMapping(value = "/task/list")
     @ApiOperation(value = "获取当前人员待办列表",notes = "获取当前人员待办列表,如果要查询所有，则传all")
     public CommonResponse taskList(@RequestParam(value = "processDefinitionKey", required = true,defaultValue = "all") @ApiParam("流程定义KEY(act_re_procdef表KEY)")String processDefinitionKey,
@@ -85,8 +93,6 @@ public class ProcessController  {
     }
 
 
-
-
     /**
      * 签收任务
      */
@@ -101,10 +107,14 @@ public class ProcessController  {
     /**
      * 办理任务，提交task，并保存form
      */
-    @PostMapping(value = "/task/complete/{taskId}")
-    @ApiOperation(value = "办理任务，提交task，并保存form",notes = "办理任务，提交task，并保存form")
-    public CommonResponse completeTask(@PathVariable("taskId") String taskId, HttpServletRequest request) {
-        processService.completeTask(taskId,request);
+    @PostMapping(value = "/task/complete")
+    @ApiOperation(value = "办理任务",notes = "办理任务、保存form、保存审批意见")
+    public CommonResponse completeTask(@RequestParam(value = "taskId",required = true) @ApiParam(value = "任务ID",required = true)String taskId,
+                                       @RequestParam(value = "processInstanceId",required = false) @ApiParam(value = "流程实例ID",required = false)String processInstanceId,
+                                       @RequestParam(value = "comment",required = false,defaultValue = "同意") @ApiParam(value = "审批意见",required = false)String comment,
+                                       @RequestParam(value = "type",required = false) @ApiParam(value = "类型",required = false)String type,
+                                       HttpServletRequest request) {
+        processService.completeTask(taskId,processInstanceId,comment,type,request);
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("任务办理成功").data(taskId);
     }
 
@@ -188,6 +198,7 @@ public class ProcessController  {
         processService.deleteProcessInstance(processInstanceId,deleteReason);
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("删除流程实例成功");
     }
+
 
 
 }

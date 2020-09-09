@@ -24,6 +24,7 @@ import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.lang3.StringUtils;
@@ -32,9 +33,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
@@ -97,6 +100,60 @@ public class ProcessServiceImpl implements ProcessService {
                 response.getOutputStream().write(b, 0, len);
             }
         }
+    }
+
+    @Override
+    public void image(String pProcessInstanceId, HttpServletResponse response) throws Exception {
+        try {
+            InputStream is = this.getDiagram(pProcessInstanceId);
+            if (is == null)
+                return;
+
+            response.setContentType("image/png");
+
+            BufferedImage image = ImageIO.read(is);
+            OutputStream out = response.getOutputStream();
+            ImageIO.write(image, "png", out);
+
+            is.close();
+            out.close();
+        } catch (Exception ex) {
+            log.error("查看流程图失败", ex);
+        }
+    }
+
+    //service层代码
+    public InputStream getDiagram(String processInstanceId) {
+        //获得流程实例
+        ProcessInstance processInstance = runtimeService.createProcessInstanceQuery()
+                .processInstanceId(processInstanceId).singleResult();
+        String processDefinitionId = StringUtils.EMPTY;
+        if (processInstance == null) {
+            //查询已经结束的流程实例
+            HistoricProcessInstance processInstanceHistory =
+                    historyService.createHistoricProcessInstanceQuery()
+                            .processInstanceId(processInstanceId).singleResult();
+            if (processInstanceHistory == null)
+                return null;
+            else
+                processDefinitionId = processInstanceHistory.getProcessDefinitionId();
+        } else {
+            processDefinitionId = processInstance.getProcessDefinitionId();
+        }
+
+        //使用宋体
+        String fontName = "宋体";
+        //获取BPMN模型对象
+        BpmnModel model = repositoryService.getBpmnModel(processDefinitionId);
+        //获取流程实例当前的节点，需要高亮显示
+        List<String> currentActs = Collections.EMPTY_LIST;
+        if (processInstance != null)
+            currentActs = runtimeService.getActiveActivityIds(processInstance.getId());
+
+        return processEngine.getProcessEngineConfiguration()
+                .getProcessDiagramGenerator()
+                .generateDiagram(model, "png", currentActs, new ArrayList<String>(),
+                        fontName, fontName, fontName, null, 1.0);
     }
 
 
@@ -276,7 +333,7 @@ public class ProcessServiceImpl implements ProcessService {
 
 
     @Override
-    public void completeTask(String taskId, HttpServletRequest request) {
+    public void completeTask(String taskId, String processInstanceId,String comment,String type,HttpServletRequest request) {
         Map<String, String> formProperties = new HashMap<String, String>();
         // 从request中读取参数然后转换
         Map<String, String[]> parameterMap = request.getParameterMap();
@@ -299,11 +356,22 @@ public class ProcessServiceImpl implements ProcessService {
         }
         try {
             identityService.setAuthenticatedUserId(user.getId());
+            //添加评论
+            if (!comment.isEmpty()){
+                if (type == null){
+                    taskService.addComment(taskId,processInstanceId,comment);
+                }else{
+                    taskService.addComment(taskId,processInstanceId,type,comment);
+                }
+
+            }
             formService.submitTaskFormData(taskId, formProperties);
         } finally {
             identityService.setAuthenticatedUserId(null);
         }
     }
+
+
 
     /**
      * 获取动态表单提交的数据，并发起流程，表单数据 key-value结构，key需要以fp_开头

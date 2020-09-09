@@ -9,7 +9,7 @@ workflow:
   # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/uploadPath）
   profile: D:/workflow/uploadPath
   # 当前操作人
-  operator: leaderuser
+  operator: hruser
 
 
 #日志配置
