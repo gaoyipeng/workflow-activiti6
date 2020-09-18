@@ -191,12 +191,50 @@ public class ProcessController  {
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).data(page);
     }
 
+    /**
+     * 执行此方法后未审批的任务 act_ru_task 会被删除，流程历史 act_hi_taskinst 不会被删除，并且流程历史的状态为finished完成
+     * @param processInstanceId
+     * @param deleteReason
+     * @return
+     */
     @DeleteMapping (value = "/deleteProcessInstance")
-    @ApiOperation(value = "删除流程实例",notes = "删除流程实例")
+    @ApiOperation(value = "删除流程实例(任务撤销)",notes = "删除流程实例")
     public CommonResponse deleteProcessInstance(@RequestParam(value = "processInstanceId", required = true)@ApiParam(value = "流程实例Id" ,required = true)String processInstanceId,
                                       @RequestParam(value = "deleteReason", required = false,defaultValue = "")@ApiParam(value = "原因" ,required = false)String deleteReason){
         processService.deleteProcessInstance(processInstanceId,deleteReason);
         return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("删除流程实例成功");
+    }
+    @PostMapping(value = "/rejectAnyNode")
+    @ApiOperation(value = "流程驳回",notes = "流程驳回")
+    public CommonResponse rejectAnyNode(@RequestParam(value = "taskId", required = true)@ApiParam(value = "当前任务ID" ,required = true)String taskId,
+                                        @RequestParam(value = "flowElementId", required = false)@ApiParam(value = "驳回指定节点ID(为空则返回流程起始节点)" ,required = false)String flowElementId){
+        processService.rejectAnyNode(taskId,flowElementId);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("流程驳回成功");
+    }
+
+    @PostMapping(value = "/delegateTask")
+    @ApiOperation(value = "委托任务",notes = "委托任务")
+    public CommonResponse delegateTask(@RequestParam(value = "taskId", required = true)@ApiParam(value = "当前任务ID" ,required = true)String taskId,
+                                        @RequestParam(value = "userId", required = true)@ApiParam(value = "委托对象ID" ,required = true)String userId){
+        processService.delegateTask(taskId,userId);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("任务委托成功");
+    }
+
+    /**
+     * 当流程实例被挂起时，无法通过下一个节点对应的任务id来继续这个流程实例。
+     * 通过挂起某一特定的流程实例，可以终止当前的流程实例，而不影响到该流程定义的其他流程实例。
+     * 激活之后可以继续该流程实例，不会对后续任务造成影响。
+     * 直观变化：流程挂起时 act_ru_task 的 SUSPENSION_STATE_ 为 2
+     * @param processInstanceId
+     * @param suspendState
+     * @return
+     */
+    @PostMapping( "/suspendProcessInstance")
+    @ApiOperation(value = "挂起、激活流程实例",notes = "挂起、激活流程实例")
+    public CommonResponse suspendProcessInstance(@RequestParam(value = "processInstanceId", required = true)@ApiParam(value = "流程实例ID" ,required = true)String processInstanceId,
+                                                 @RequestParam(value = "suspendState", required = true)@ApiParam(value = "状态： 1、激活 2、挂起" ,required = true)String suspendState) {
+        processService.suspendProcessInstance(processInstanceId, suspendState);
+        return new CommonResponse().code(CodeEnum.SUCCESS.getCode()).message("操作成功");
     }
 
 

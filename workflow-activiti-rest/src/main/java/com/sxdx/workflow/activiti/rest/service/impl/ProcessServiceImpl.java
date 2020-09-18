@@ -9,16 +9,18 @@ import com.sxdx.workflow.activiti.rest.config.WorkflowConstants;
 import com.sxdx.workflow.activiti.rest.entity.vo.AcExecutionEntityImpl;
 import com.sxdx.workflow.activiti.rest.service.ProcessService;
 import lombok.extern.slf4j.Slf4j;
-import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.FlowNode;
-import org.activiti.bpmn.model.SequenceFlow;
+import org.activiti.bpmn.model.*;
+import org.activiti.bpmn.model.Process;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricActivityInstance;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.UserQueryImpl;
-import org.activiti.engine.impl.persistence.entity.ExecutionEntityImpl;
-import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
+import org.activiti.engine.impl.cmd.NeedsActiveTaskCmd;
+import org.activiti.engine.impl.interceptor.Command;
+import org.activiti.engine.impl.interceptor.CommandContext;
+import org.activiti.engine.impl.persistence.entity.*;
+import org.activiti.engine.impl.util.ProcessDefinitionUtil;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.Execution;
@@ -62,6 +64,8 @@ public class ProcessServiceImpl implements ProcessService {
     private IdentityService identityService;
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private ManagementService managementService;
 
     public void readResource(String pProcessInstanceId, HttpServletResponse response)
             throws Exception {
@@ -633,5 +637,136 @@ public class ProcessServiceImpl implements ProcessService {
         runtimeService.deleteProcessInstance(processInstanceId,deleteReason);
     }
 
+    /**
+     * 驳回指定节点
+     * @param taskId
+     * @param flowElementId
+     */
+    @Override
+    @Transactional(noRollbackFor = Exception.class)
+    public void rejectAnyNode(String taskId, String flowElementId) {
+
+        FlowNode targetNode = null;
+        log.info("流程驳回开始>>>>>>>>>>>>>>>>>>>>");
+        //获取当前任务
+        Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
+        //获取流程定义
+        Process process = repositoryService.getBpmnModel(currentTask.getProcessDefinitionId()).getMainProcess();
+        log.info("流程驳回>>>>>>>,流程名称:{}:{},当前任务:{}:{}",process.getName(),process.getId(),currentTask.getName(),currentTask.getId());
+        if (flowElementId == null || flowElementId.isEmpty()){
+            //获取流程定义第一个Node节点
+            targetNode = findFirstActivityNode(currentTask.getProcessDefinitionId());
+        }else{
+            //获取目标节点定义
+            targetNode = (FlowNode)process.getFlowElement(flowElementId);
+        }
+        if (targetNode == null){
+            throw new ActivitiException("目标节点为空");
+        }
+        //删除当前运行任务
+        String executionEntityId = managementService.executeCommand(new DeleteTaskCmd(currentTask.getId()));
+        //流程执行到来源节点
+        managementService.executeCommand(new SetFLowNodeAndGoCmd(targetNode, executionEntityId));
+        log.info("流程驳回成功<<<<<<<<<<<<<<<<<<<<<<<");
+    }
+
+
+
+    //删除当前运行时任务命令，并返回当前任务的执行对象id，这里继承了NeedsActiveTaskCmd，主要时很多跳转业务场景下，要求不能是挂起任务。
+    public class DeleteTaskCmd extends NeedsActiveTaskCmd<String> {
+        public DeleteTaskCmd(String taskId){
+            super(taskId);
+        }
+        public String execute(CommandContext commandContext, TaskEntity currentTask){
+            //获取所需服务
+            TaskEntityManagerImpl taskEntityManager = (TaskEntityManagerImpl)commandContext.getTaskEntityManager();
+            //获取当前任务的来源任务及来源节点信息
+            ExecutionEntity executionEntity = currentTask.getExecution();
+            //删除当前任务,来源任务
+            taskEntityManager.deleteTask(currentTask, "流程驳回", false, false);
+            return executionEntity.getId();
+        }
+        public String getSuspendedTaskException() {
+            return "挂起的任务不能跳转";
+        }
+    }
+
+    //根据提供节点和执行对象id，进行跳转命令
+    public class SetFLowNodeAndGoCmd implements Command<Void> {
+        private FlowNode flowElement;
+        private String executionId;
+        public SetFLowNodeAndGoCmd(FlowNode flowElement,String executionId){
+            this.flowElement = flowElement;
+            this.executionId = executionId;
+        }
+
+        public Void execute(CommandContext commandContext){
+            //获取目标节点的来源连线
+            List<SequenceFlow> flows = flowElement.getIncomingFlows();
+            if(flows==null || flows.size()<1){
+                throw new ActivitiException("回退错误，目标节点没有来源连线");
+            }
+            //随便选一条连线来执行，时当前执行计划为，从连线流转到目标节点，实现跳转
+            ExecutionEntity executionEntity = commandContext.getExecutionEntityManager().findById(executionId);
+            executionEntity.setCurrentFlowElement(flows.get(0));
+            commandContext.getAgenda().planTakeOutgoingSequenceFlowsOperation(executionEntity, true);
+            return null;
+        }
+    }
+
+    /**
+     * 获得流程定义第一个节点
+     */
+    public FlowNode findFirstActivityNode(String processDefinitionId) {
+        BpmnModel model = repositoryService.getBpmnModel(processDefinitionId);
+        //Process process = ProcessDefinitionUtil.getProcess(processDefinitionId);
+        Process process = model.getMainProcess();
+        FlowElement flowElement = process.getInitialFlowElement();
+        FlowNode startActivity = (FlowNode) flowElement;
+
+        if (startActivity.getOutgoingFlows().size() != 1) {
+            throw new IllegalStateException(
+                    "start activity outgoing transitions cannot more than 1, now is : "
+                            + startActivity.getOutgoingFlows().size());
+        }
+
+        SequenceFlow sequenceFlow = startActivity.getOutgoingFlows()
+                .get(0);
+        FlowNode targetActivity = (FlowNode) sequenceFlow.getTargetFlowElement();
+
+        if (!(targetActivity instanceof UserTask)) {
+            log.info("first activity is not userTask, just skip");
+            return null;
+        }
+
+        return targetActivity;
+    }
+
+    /**
+     * 任务委托
+     * @param taskId
+     * @param userId
+     */
+    @Override
+    public void delegateTask(String taskId, String userId) {
+        taskService.delegateTask(taskId, userId);
+        //添加备注
+        Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
+        taskService.addComment(taskId,currentTask.getProcessInstanceId(),"任务委托给"+userId);
+    }
+
+    /**
+     * 挂起、激活流程实例
+     * @param processInstanceId
+     * @param suspendState
+     */
+    @Override
+    public void suspendProcessInstance(String processInstanceId, String suspendState) {
+        if ("2".equals(suspendState)) {
+            runtimeService.suspendProcessInstanceById(processInstanceId);
+        } else if ("1".equals(suspendState)) {
+            runtimeService.activateProcessInstanceById(processInstanceId);
+        }
+    }
 
 }

@@ -28,4 +28,7 @@ public interface ProcessService {
     Page signalEventSubscriptionName(int pageNum, int pageSize, String signalName,String processInstanceId) ;
     Page messageEventSubscriptionName(int pageNum, int pageSize, String messageName,String processInstanceId) ;
     void deleteProcessInstance(String processInstanceId,String deleteReason);
+    void rejectAnyNode(String taskId,String flowElementId);
+    void delegateTask(String taskId,String userId);
+    void suspendProcessInstance(String processInstanceId, String suspendState);
 }

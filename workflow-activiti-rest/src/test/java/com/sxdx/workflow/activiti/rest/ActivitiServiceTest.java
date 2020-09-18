@@ -253,8 +253,8 @@ public class ActivitiServiceTest {
     //跳转方法
     @Test
     public void jump(){
-        String taskId = "202505";
-        String targetNodeName = "startevent1";
+        String taskId = "207505";
+        String flowElementId = "deptLeaderAudit";
         //当前任务
         Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
         System.out.println("------------"+currentTask.getName());
@@ -262,7 +262,7 @@ public class ActivitiServiceTest {
         Process process = repositoryService.getBpmnModel(currentTask.getProcessDefinitionId()).getMainProcess();
         System.out.println("------------"+process.getName());
         //获取目标节点定义
-        FlowNode targetNode = (FlowNode)process.getFlowElement(targetNodeName);
+        FlowNode targetNode = (FlowNode)process.getFlowElement(flowElementId);
         System.out.println("------------"+targetNode.getName());
         //删除当前运行任务
         String executionEntityId = managementService.executeCommand(new DeleteTaskCmd(currentTask.getId()));
