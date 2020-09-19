@@ -9,6 +9,7 @@ import com.sxdx.workflow.activiti.rest.config.WorkflowConstants;
 import com.sxdx.workflow.activiti.rest.entity.vo.AcExecutionEntityImpl;
 import com.sxdx.workflow.activiti.rest.service.ProcessService;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.activiti.bpmn.model.*;
 import org.activiti.bpmn.model.Process;
 import org.activiti.engine.*;
@@ -27,6 +28,7 @@ import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Comment;
+import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.apache.commons.lang3.StringUtils;
@@ -338,7 +340,9 @@ public class ProcessServiceImpl implements ProcessService {
 
     @Override
     public void completeTask(String taskId, String processInstanceId,String comment,String type,HttpServletRequest request) {
-        Map<String, String> formProperties = new HashMap<String, String>();
+        Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+
+        Map<String, Object> formProperties = new HashMap<String, Object>();
         // 从request中读取参数然后转换
         Map<String, String[]> parameterMap = request.getParameterMap();
         Set<Map.Entry<String, String[]>> entrySet = parameterMap.entrySet();
@@ -367,9 +371,13 @@ public class ProcessServiceImpl implements ProcessService {
                 }else{
                     taskService.addComment(taskId,processInstanceId,type,comment);
                 }
-
             }
-            formService.submitTaskFormData(taskId, formProperties);
+            //任务委托处理
+            DelegationState delegationState = task.getDelegationState();
+            if (delegationState.toString().equals("PENDING")){
+                taskService.resolveTask(taskId,formProperties);
+            }
+            taskService.complete(taskId, formProperties);
         } finally {
             identityService.setAuthenticatedUserId(null);
         }
@@ -650,6 +658,32 @@ public class ProcessServiceImpl implements ProcessService {
         log.info("流程驳回开始>>>>>>>>>>>>>>>>>>>>");
         //获取当前任务
         Task currentTask = taskService.createTaskQuery().taskId(taskId).singleResult();
+
+        //获取当前操作人
+        UserQueryImpl user = new UserQueryImpl();
+        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+
+        //判断当前用户是否为该节点处理人
+        if(currentTask.getAssignee() == null || !currentTask.getAssignee().equals(user.getId())){
+            throw new ActivitiException("当前用户无法驳回,请先签收任务");
+        }
+
+        //获取当前节点信息
+        String currActivityId = currentTask.getTaskDefinitionKey();
+        String processDefinitionId = currentTask.getProcessDefinitionId();
+        BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
+        FlowNode currFlow = (FlowNode) bpmnModel.getMainProcess().getFlowElement(currActivityId);
+        if (null == currFlow) {
+            List<SubProcess> subProcessList = bpmnModel.getMainProcess().findFlowElementsOfType(SubProcess.class, true);
+            for (SubProcess subProcess : subProcessList) {
+                FlowElement flowElement = subProcess.getFlowElement(currActivityId);
+                if (flowElement != null) {
+                    currFlow = (FlowNode) flowElement;
+                    break;
+                }
+            }
+        }
+
         //获取流程定义
         Process process = repositoryService.getBpmnModel(currentTask.getProcessDefinitionId()).getMainProcess();
         log.info("流程驳回>>>>>>>,流程名称:{}:{},当前任务:{}:{}",process.getName(),process.getId(),currentTask.getName(),currentTask.getId());
@@ -663,14 +697,16 @@ public class ProcessServiceImpl implements ProcessService {
         if (targetNode == null){
             throw new ActivitiException("目标节点为空");
         }
+        //如果不是同一个流程(子流程)不能驳回
+        if (!(currFlow.getParentContainer().equals(targetNode.getParentContainer()))) {
+            throw new ActivitiException("不是同一个流程(子流程)不能驳回");
+        }
         //删除当前运行任务
         String executionEntityId = managementService.executeCommand(new DeleteTaskCmd(currentTask.getId()));
         //流程执行到来源节点
         managementService.executeCommand(new SetFLowNodeAndGoCmd(targetNode, executionEntityId));
         log.info("流程驳回成功<<<<<<<<<<<<<<<<<<<<<<<");
     }
-
-
 
     //删除当前运行时任务命令，并返回当前任务的执行对象id，这里继承了NeedsActiveTaskCmd，主要时很多跳转业务场景下，要求不能是挂起任务。
     public class DeleteTaskCmd extends NeedsActiveTaskCmd<String> {
@@ -706,7 +742,7 @@ public class ProcessServiceImpl implements ProcessService {
             if(flows==null || flows.size()<1){
                 throw new ActivitiException("回退错误，目标节点没有来源连线");
             }
-            //随便选一条连线来执行，时当前执行计划为，从连线流转到目标节点，实现跳转
+            //随便选一条连线来执行，当前执行计划为，从连线流转到目标节点，实现跳转
             ExecutionEntity executionEntity = commandContext.getExecutionEntityManager().findById(executionId);
             executionEntity.setCurrentFlowElement(flows.get(0));
             commandContext.getAgenda().planTakeOutgoingSequenceFlowsOperation(executionEntity, true);
