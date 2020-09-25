@@ -52,7 +52,7 @@ public class AuthorizationServerConfigurer extends AuthorizationServerConfigurer
                 .authorizedGrantTypes("password", "refresh_token","authorization_code","client_credentials")
                 .autoApprove(true)
                 .scopes("all")
-                .redirectUris("http://127.0.0.1:8001/getCode","http://localhost:8001/getCode")
+                .redirectUris("https://www.baidu.com")
                 .resourceIds("kiki-resource","client1-resource","client2-resource");
     }
 

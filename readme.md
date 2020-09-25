@@ -8,7 +8,7 @@
 | 服务                   | 端口 |
 | ---------------------- | ---- |
 | workflow-activiti-rest | 9090 |
-| workflow-auth          | 9080 |
+| workflow-auth          | 8101 |
 
 
 ## 项目教程：
