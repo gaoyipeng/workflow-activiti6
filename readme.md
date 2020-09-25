@@ -4,6 +4,13 @@
 * Mybatis-Plus-3.3.2
 * swagger-2.9.2
 
+## 服务端口
+| 服务                   | 端口 |
+| ---------------------- | ---- |
+| workflow-activiti-rest | 9090 |
+| workflow-auth          | 9080 |
+
+
 ## 项目教程：
 [https://www.kancloud.cn/gaoyipeng/garnett](https://www.kancloud.cn/gaoyipeng/garnett)
 

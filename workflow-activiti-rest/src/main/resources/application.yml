@@ -1,6 +1,8 @@
 spring:
+  application:
+    name: workflow-activiti-rest
   profiles:
-    active: release
+    active: dev
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
@@ -10,6 +12,20 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+
+server:
+  # 服务器的HTTP端口，默认为80
+  port: 9090
+  servlet:
+    # 应用的访问路径
+    context-path: /
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # tomcat最大线程数，默认为200
+    max-threads: 800
+    # Tomcat启动初始化的线程数，默认值25
+    min-spare-threads: 30
 
 # mybatis-plus相关配置
 mybatis-plus:
@@ -37,5 +53,5 @@ pagehelper:
   # 指定使用的数据库数据库
   helperDialect: mysql
   # reasonable：分页合理化参数，默认值为false。当该参数设置为 true 时，pageNum<=0 时会查询第一页， 		pageNum>pages（超过总数时），会查询最后一页。默认false 时，直接根据参数进行查询。
-  reasonable: false
+  reasonable: true
 

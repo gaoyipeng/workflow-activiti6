@@ -3,7 +3,7 @@
 
     <springProperty scope="context" name="springAppName" source="spring.application.name"/>
 
-    <property name="log.path" value="logs/workflow-activiti-rest" />
+    <property name="log.path" value="logs/workflow-auth" />
     <property name="log.maxHistory" value="15"/>
     <property name="log.colorPattern" value="%magenta(%d{yyyy-MM-dd HH:mm:ss}) %highlight(%-5level) %boldCyan(${springAppName:-}) %yellow(%thread) %green(%logger) %msg%n"/>
     <property name="log.pattern" value="%d{yyyy-MM-dd HH:mm:ss} %-5level ${springAppName:-} %thread %logger %msg%n"/>
