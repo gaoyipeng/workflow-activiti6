@@ -12,13 +12,6 @@ workflow:
   operator: hruser # leaderuser
 
 
-#日志配置
-logging:
-  path: I:/workspace/idea-workspace/workflow-activiti6/logs #保存日志
-  config: classpath:logback-spring.xml
-  lv: info # 控制台日志输出级别
-  dateSize: 30 # 日志保存天数
-
 spring:
   autoconfigure:
     exclude: com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfigure

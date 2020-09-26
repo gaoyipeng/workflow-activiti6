@@ -49,11 +49,11 @@ public class AuthorizationServerConfigurer extends AuthorizationServerConfigurer
         clients.inMemory()
                 .withClient("kiki")
                 .secret(passwordEncoder.encode("123456"))
-                .authorizedGrantTypes("password", "refresh_token","authorization_code","client_credentials")
+                .authorizedGrantTypes("password","authorization_code","client_credentials" ,"implicit","refresh_token")
                 .autoApprove(true)
                 .scopes("all")
                 .redirectUris("https://www.baidu.com")
-                .resourceIds("kiki-resource","client1-resource","client2-resource");
+                .resourceIds("kiki-resource","activiti-rest");
     }
 
     /**
@@ -68,7 +68,7 @@ public class AuthorizationServerConfigurer extends AuthorizationServerConfigurer
                 .allowFormAuthenticationForClients();//允许表单认证
     }
 
-    /**
+    /**ClientCredentialsTokenEndpointFilter
      * 配置令牌（token）的访问端点和令牌服务（token service）
      * @param endpoints
      * @throws Exception

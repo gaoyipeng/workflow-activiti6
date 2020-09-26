@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class,
+@SpringBootApplication(exclude = {
         org.activiti.spring.boot.SecurityAutoConfiguration.class,
         org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
 })

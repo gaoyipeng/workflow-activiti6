@@ -7,12 +7,7 @@ workflow:
   # 版权年份
   copyrightYear: 2020
 
-#日志配置
-logging:
-  path: E:/Data/idea-workspace/workflow-activiti6/logs #保存日志
-  config: classpath:logback-spring.xml
-  lv: info # 控制台日志输出级别
-  dateSize: 30 # 日志保存天数
+
 
 
 
