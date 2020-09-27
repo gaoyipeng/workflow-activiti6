@@ -1,0 +1,7 @@
+security:
+  oauth2:
+    client:
+      client-id: kiki #指定了客户端id
+      client-secret: 123456 # 指定了客户端密码
+    resource:
+      token-info-uri: http://127.0.0.1:8101/oauth/check_token #sso客户端token验证，资源服务器就是通过这个向认证服务器校验token是否有效，是否可以访问本resource资源

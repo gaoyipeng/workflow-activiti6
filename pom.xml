@@ -12,6 +12,7 @@
         <module>workflow-activiti-rest</module>
         <module>workflow-common</module>
         <module>workflow-auth</module>
+        <module>workflow-web</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

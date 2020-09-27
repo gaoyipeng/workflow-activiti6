@@ -53,7 +53,7 @@ public class AuthorizationServerConfigurer extends AuthorizationServerConfigurer
                 .autoApprove(true)
                 .scopes("all")
                 .redirectUris("https://www.baidu.com")
-                .resourceIds("kiki-resource","activiti-rest");
+                .resourceIds("activiti-rest","activiti-web");
     }
 
     /**
