@@ -9,10 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 public class MybatisTest {
 
     @Autowired
@@ -23,4 +24,10 @@ public class MybatisTest {
         Page<Leave> selectPage = leaveMapper.selectPage(new Page<>(1, 2), new QueryWrapper<Leave>().eq("id", 1));
         System.out.println("----------"+selectPage.toString()+"----"+selectPage.getRecords());
     }
+
+    @Test
+    public void test1(){
+        System.out.println("-------------"+new BCryptPasswordEncoder().encode("123456"));
+    }
+
 }
