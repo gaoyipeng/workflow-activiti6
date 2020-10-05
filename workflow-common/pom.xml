@@ -26,10 +26,10 @@
             <artifactId>spring-web</artifactId>
         </dependency>
 
-        <!-- pagehelper 分页插件 -->
+
         <dependency>
-            <groupId>com.github.pagehelper</groupId>
-            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
         <!--常用工具类 -->

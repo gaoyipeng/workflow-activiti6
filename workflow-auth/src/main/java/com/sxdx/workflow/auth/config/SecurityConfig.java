@@ -44,6 +44,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/oauth/**").authenticated()
                 .and()
                 .formLogin().permitAll();
-
     }
 }

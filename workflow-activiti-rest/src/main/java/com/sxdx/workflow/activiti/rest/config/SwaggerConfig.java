@@ -42,10 +42,10 @@ public class SwaggerConfig {
      */
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .contact(new Contact("Activiti6工作流系统搭建教程","https://www.kancloud.cn/gaoyipeng/garnett","garnett_boy@sina.com"))
+                .contact(new Contact("Garnett","https://blog.gaoyp.cn/","garnett_boy@sina.com"))
                 .title("Springboot2集成Activiti6")
                 .description("Springboot2集成Activiti6")
-                .termsOfServiceUrl("https://blog.gaoyp.cn/")
+                .termsOfServiceUrl("https://www.kancloud.cn/gaoyipeng/garnett")
                 .version(VERSION)
                 .build();
     }

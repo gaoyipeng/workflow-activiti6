@@ -10,7 +10,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication(exclude = {
         org.activiti.spring.boot.SecurityAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+        //org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
 })
 @ComponentScan("com.sxdx")
 @MapperScan("com.sxdx.workflow.activiti.rest.mapper")

@@ -18,14 +18,18 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+
+import java.util.Arrays;
 
 /**
  * 认证服务器配置
  */
 @Configuration
 @EnableAuthorizationServer
-public class AuthorizationServerConfigurer extends AuthorizationServerConfigurerAdapter {
+public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -39,7 +43,10 @@ public class AuthorizationServerConfigurer extends AuthorizationServerConfigurer
     private AuthenticationManager authenticationManager;
     @Autowired
     private OauthUserDetailService userDetailService;
-
+    @Autowired
+    private JwtAccessTokenConverter jwtAccessTokenConverter;
+    @Autowired
+    private TokenEnhancerConfig tokenEnhancer;
 
     /**
      * 配置客户端详情信息
@@ -96,6 +103,11 @@ public class AuthorizationServerConfigurer extends AuthorizationServerConfigurer
         tokenServices.setSupportRefreshToken(true);//支持token刷新
         tokenServices.setAccessTokenValiditySeconds(60 * 60 * 24);//令牌默认有效期
         tokenServices.setRefreshTokenValiditySeconds(60 * 60 * 24 * 7);//刷新令牌默认有效期
+
+        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(tokenEnhancer, jwtAccessTokenConverter));
+        tokenServices.setTokenEnhancer(tokenEnhancerChain);
+
         return tokenServices;
     }
 
