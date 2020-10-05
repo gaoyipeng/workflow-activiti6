@@ -15,13 +15,16 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
+import org.springframework.security.oauth2.provider.client.JdbcClientDetailsService;
 import org.springframework.security.oauth2.provider.code.AuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.code.InMemoryAuthorizationCodeServices;
+import org.springframework.security.oauth2.provider.code.JdbcAuthorizationCodeServices;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
+import javax.sql.DataSource;
 import java.util.Arrays;
 
 /**
@@ -48,20 +51,34 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private TokenEnhancerConfig tokenEnhancer;
 
+
     /**
      * 配置客户端详情信息
      * @param clients
      * @throws Exception
      */
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.inMemory()
+        clients.withClientDetails(clientDetailsService);
+        /*clients.inMemory()
                 .withClient("kiki")
                 .secret(passwordEncoder.encode("123456"))
                 .authorizedGrantTypes("password","authorization_code","client_credentials" ,"implicit","refresh_token")
                 .autoApprove(true)
                 .scopes("all")
                 .redirectUris("https://www.baidu.com")
-                .resourceIds("activiti-rest","activiti-web","activiti-auth");
+                .resourceIds("activiti-rest","activiti-web","activiti-auth");*/
+    }
+
+    /**
+     * 数据库获取客户端信息
+     * @param dataSource
+     * @return
+     */
+    @Bean
+    public ClientDetailsService clientDetailsService(DataSource dataSource) {
+        ClientDetailsService clientDetailsService = new JdbcClientDetailsService(dataSource);
+        ((JdbcClientDetailsService) clientDetailsService).setPasswordEncoder(passwordEncoder);
+        return clientDetailsService;
     }
 
     /**
@@ -116,8 +133,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
      * @return
      */
     @Bean
-    public AuthorizationCodeServices authorizationCodeServices(){
-        return new InMemoryAuthorizationCodeServices();
+    public AuthorizationCodeServices authorizationCodeServices(DataSource dataSource){
+        return new JdbcAuthorizationCodeServices(dataSource);//设置授权码模式的授权码如何存取
+        //return new InMemoryAuthorizationCodeServices();
     }
 
 }
