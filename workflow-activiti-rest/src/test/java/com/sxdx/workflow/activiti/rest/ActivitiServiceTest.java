@@ -55,6 +55,7 @@ public class ActivitiServiceTest {
         //如果表不存在，则自动创建表
         processEngineConfiguration.setDatabaseSchemaUpdate(ProcessEngineConfiguration.DB_SCHEMA_UPDATE_TRUE);
         processEngine = processEngineConfiguration.buildProcessEngine();
+
         System.out.println(processEngine.toString());
 
         repositoryService = processEngine.getRepositoryService();

@@ -42,6 +42,11 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .requestMatchers().antMatchers("/**")
                 .and()
                 .authorizeRequests()
+                .antMatchers("/v2/api-docs", "/swagger-resources/configuration/ui",
+                        "/swagger-resources", "/swagger-resources/configuration/security",
+                        "/swagger-ui.html", "/webjars/**").permitAll()
+                .antMatchers("/modeler/**").permitAll()
+                .antMatchers("/druid/**").permitAll()
                 .antMatchers("/**").authenticated();
     }
 }
