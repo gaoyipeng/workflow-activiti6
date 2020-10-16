@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sxdx.workflow.web.mapper.UserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.sxdx.workflow.web.entity.User">
+        <id column="user_id" property="userId" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="dept_id" property="deptId" />
+        <result column="email" property="email" />
+        <result column="mobile" property="mobile" />
+        <result column="status" property="status" />
+        <result column="order_num" property="orderNum" />
+        <result column="create_time" property="createTime" />
+        <result column="modify_time" property="modifyTime" />
+        <result column="last_login_time" property="lastLoginTime" />
+        <result column="gender" property="gender" />
+        <result column="avatar" property="avatar" />
+        <result column="description" property="description" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        user_id, username, password, dept_id, email, mobile, status, order_num, create_time, modify_time, last_login_time, gender, avatar, description
+    </sql>
+
+</mapper>
