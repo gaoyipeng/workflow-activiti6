@@ -2,6 +2,7 @@ package com.sxdx.workflow.web.mapper;
 
 import com.sxdx.workflow.web.entity.UserRole;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.springframework.stereotype.Repository;
 
 /**
  * <p>
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author Garnett
  * @since 2020-10-16
  */
+@Repository
 public interface UserRoleMapper extends BaseMapper<UserRole> {
 
 }

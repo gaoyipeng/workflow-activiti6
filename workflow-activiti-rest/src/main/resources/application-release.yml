@@ -20,7 +20,7 @@ spring:
   activiti:
     check-process-definitions: false
     # 检测身份信息表是否存在
-    #db-identity-used: false
+    db-identity-used: false
   datasource:
     dynamic:
       p6spy: true

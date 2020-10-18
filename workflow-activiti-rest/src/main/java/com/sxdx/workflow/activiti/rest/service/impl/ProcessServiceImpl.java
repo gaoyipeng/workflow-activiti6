@@ -2,8 +2,10 @@ package com.sxdx.workflow.activiti.rest.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.sxdx.common.config.GlobalConfig;
+import com.sxdx.common.entity.CurrentUser;
 import com.sxdx.common.exception.base.CommonException;
 import com.sxdx.common.util.Page;
+import com.sxdx.common.util.workFlowUtil;
 import com.sxdx.workflow.activiti.rest.config.ICustomProcessDiagramGenerator;
 import com.sxdx.workflow.activiti.rest.config.WorkflowConstants;
 import com.sxdx.workflow.activiti.rest.entity.vo.AcExecutionEntityImpl;
@@ -305,6 +307,8 @@ public class ProcessServiceImpl implements ProcessService {
     @Override
     public Page taskList(String processDefinitionKey, int pageNum,int pageSize) {
         Page page = new Page(pageNum,pageSize);
+
+        CurrentUser currentUser = workFlowUtil.getCurrentUser();
 
         UserQueryImpl user = new UserQueryImpl();
         user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());

@@ -9,7 +9,7 @@ workflow:
   # 文件路径 示例（ Windows配置D:/ruoyi/uploadPath，Linux配置 /home/uploadPath）
   profile: D:/workflow/uploadPath
   # 当前操作人
-  operator: hruser #leaderuser  hruser
+  operator: 4 #leaderuser  hruser
 
 
 spring:
@@ -20,8 +20,7 @@ spring:
   activiti:
     check-process-definitions: false
     # 检测身份信息表是否存在
-    #db-identity-used: false
-    history-level: full
+    db-identity-used: false
   datasource:
     dynamic:
       p6spy: true
