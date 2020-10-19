@@ -1,17 +1,12 @@
 package com.sxdx.common.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sxdx.common.entity.AuthUser;
-import com.sxdx.common.entity.CurrentUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 
 /**
  * @program: workflow-activiti
@@ -21,31 +16,10 @@ import java.util.LinkedHashMap;
  **/
 @Slf4j
 public class workFlowUtil {
-    /**
-     * 获取在线用户信息
-     *
-     * @return CurrentUser 当前用户信息
-     */
-    public static CurrentUser getCurrentUser() {
-        try {
-            LinkedHashMap<String, Object> authenticationDetails = getAuthenticationDetails();
-            Object principal = authenticationDetails.get("principal");
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(mapper.writeValueAsString(principal), CurrentUser.class);
-        } catch (Exception e) {
-            log.error("获取当前用户信息失败", e);
-            return null;
-        }
-    }
 
-    @SuppressWarnings("all")
-    private static LinkedHashMap<String, Object> getAuthenticationDetails() {
-        return (LinkedHashMap<String, Object>) getOauth2Authentication().getUserAuthentication().getDetails();
-    }
-
-    private static OAuth2Authentication getOauth2Authentication() {
+    private static Authentication getOauth2Authentication() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (OAuth2Authentication) authentication;
+        return authentication;
     }
 
     /**
@@ -54,11 +28,8 @@ public class workFlowUtil {
      * @return String 用户名
      */
     public static String getCurrentUsername() {
-        Object principal = getOauth2Authentication().getPrincipal();
-        if (principal instanceof AuthUser) {
-            return ((AuthUser) principal).getUsername();
-        }
-        return (String) getOauth2Authentication().getPrincipal();
+        String name = getOauth2Authentication().getName();
+        return name;
     }
 
     /**
@@ -67,7 +38,7 @@ public class workFlowUtil {
      * @return Collection<GrantedAuthority>权限集
      */
     public static Collection<GrantedAuthority> getCurrentUserAuthority() {
-        return getOauth2Authentication().getAuthorities();
+        return (Collection<GrantedAuthority>) getOauth2Authentication().getAuthorities();
     }
 
     /**

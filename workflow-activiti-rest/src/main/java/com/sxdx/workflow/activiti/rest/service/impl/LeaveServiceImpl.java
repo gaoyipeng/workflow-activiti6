@@ -8,6 +8,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.sxdx.common.config.GlobalConfig;
 import com.sxdx.common.util.Page;
+import com.sxdx.common.util.workFlowUtil;
 import com.sxdx.workflow.activiti.rest.entity.Leave;
 import com.sxdx.workflow.activiti.rest.mapper.LeaveMapper;
 import com.sxdx.workflow.activiti.rest.service.ILeaveService;
@@ -79,7 +80,7 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
         List<Leave> results = new ArrayList<Leave>();
 
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         List<Task> tasks = new ArrayList<Task>();
 

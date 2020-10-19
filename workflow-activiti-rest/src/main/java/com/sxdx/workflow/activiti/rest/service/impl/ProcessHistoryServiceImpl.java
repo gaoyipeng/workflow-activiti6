@@ -25,7 +25,7 @@ public class ProcessHistoryServiceImpl implements ProcessHistoryService {
             list = historyService // 历史任务Service
                     .createHistoricTaskInstanceQuery() // 创建历史任务实例查询
                     .orderByHistoricTaskInstanceStartTime().asc() //排序
-                    //.taskAssignee(GlobalConfig.getOperator()) // 指定办理人
+                    //.taskAssignee(workFlowUtil.getCurrentUsername()) // 指定办理人
                     .processInstanceId(processInstanceId)
                     .finished() // 查询已经完成的任务
                     .list();
@@ -33,7 +33,7 @@ public class ProcessHistoryServiceImpl implements ProcessHistoryService {
             list = historyService // 历史任务Service
                     .createHistoricTaskInstanceQuery() // 创建历史任务实例查询
                     .orderByHistoricTaskInstanceStartTime().asc()
-                    //.taskAssignee(GlobalConfig.getOperator()) // 指定办理人
+                    //.taskAssignee(workFlowUtil.getCurrentUsername()) // 指定办理人
                     .processInstanceId(processInstanceId)
                     .unfinished()// 查询未完成的任务
                     .list();
@@ -41,7 +41,7 @@ public class ProcessHistoryServiceImpl implements ProcessHistoryService {
             list = historyService // 历史任务Service
                     .createHistoricTaskInstanceQuery() // 创建历史任务实例查询
                     .orderByHistoricTaskInstanceStartTime().asc()
-                    //.taskAssignee(GlobalConfig.getOperator()) // 指定办理人
+                    //.taskAssignee(workFlowUtil.getCurrentUsername()) // 指定办理人
                     .processInstanceId(processInstanceId)
                     .list();
         }

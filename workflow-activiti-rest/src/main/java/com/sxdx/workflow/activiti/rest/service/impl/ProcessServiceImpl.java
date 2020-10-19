@@ -2,6 +2,7 @@ package com.sxdx.workflow.activiti.rest.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.sxdx.common.config.GlobalConfig;
+import com.sxdx.common.entity.AuthUser;
 import com.sxdx.common.entity.CurrentUser;
 import com.sxdx.common.exception.base.CommonException;
 import com.sxdx.common.util.Page;
@@ -308,10 +309,13 @@ public class ProcessServiceImpl implements ProcessService {
     public Page taskList(String processDefinitionKey, int pageNum,int pageSize) {
         Page page = new Page(pageNum,pageSize);
 
-        CurrentUser currentUser = workFlowUtil.getCurrentUser();
+        String currentUser = workFlowUtil.getCurrentUsername();
+        log.info(workFlowUtil.getCurrentUserAuthority().toString());
+        log.info(workFlowUtil.getCurrentTokenValue().toString());
+
 
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         List<Task> tasks = new ArrayList<Task>();
         TaskQuery taskQuery = taskService.createTaskQuery();
@@ -335,7 +339,7 @@ public class ProcessServiceImpl implements ProcessService {
     public void claim(String taskId, HttpServletRequest request) {
         //TODO 此处应该添加获取当前操作人的代码,先写死用 leaderuser。
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         taskService.claim(taskId, user.getId());
     }
@@ -360,7 +364,7 @@ public class ProcessServiceImpl implements ProcessService {
         log.debug("start form parameters: {}", formProperties);
         //TODO 此处应该添加获取当前操作人的代码,先写死用 leaderuser。
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         // 用户未登录不能操作，实际应用使用权限框架实现，例如Spring Security、Shiro等
         if (user == null || StringUtils.isBlank(user.getId())) {
@@ -418,7 +422,7 @@ public class ProcessServiceImpl implements ProcessService {
 
         //TODO 此处应该添加获取当前操作人的代码,先写死用kafeitu发起流程。用户未登录不能操作，实际应用使用权限框架实现，例如Spring Security、Shiro等
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         ProcessInstance processInstance = null;
         try {
@@ -457,7 +461,7 @@ public class ProcessServiceImpl implements ProcessService {
         log.debug("start form parameters: {}", formProperties);
 
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         ProcessInstance processInstance = null;
         try {
@@ -497,7 +501,7 @@ public class ProcessServiceImpl implements ProcessService {
         log.debug("start form parameters: {}", formProperties);
 
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         if (!executionId.isEmpty() && formProperties.size() > 0){
             runtimeService.signalEventReceived(signalName,executionId,formProperties);
@@ -533,7 +537,7 @@ public class ProcessServiceImpl implements ProcessService {
         log.debug("start form parameters: {}", formProperties);
 
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         if (!executionId.isEmpty() && formProperties.size() > 0){
             runtimeService.messageEventReceived(messageName,executionId,formProperties);
@@ -556,7 +560,7 @@ public class ProcessServiceImpl implements ProcessService {
         Page page = new Page(pageNum,pageSize);
 
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         List<AcExecutionEntityImpl> Acexecutions = new ArrayList<AcExecutionEntityImpl>();
 
@@ -604,7 +608,7 @@ public class ProcessServiceImpl implements ProcessService {
         Page page = new Page(pageNum,pageSize);
 
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         List<AcExecutionEntityImpl> Acexecutions = new ArrayList<AcExecutionEntityImpl>();
 
@@ -665,7 +669,7 @@ public class ProcessServiceImpl implements ProcessService {
 
         //获取当前操作人
         UserQueryImpl user = new UserQueryImpl();
-        user = (UserQueryImpl)identityService.createUserQuery().userId(GlobalConfig.getOperator());
+        user = (UserQueryImpl)identityService.createUserQuery().userId(workFlowUtil.getCurrentUsername());
 
         //判断当前用户是否为该节点处理人
         if(currentTask.getAssignee() == null || !currentTask.getAssignee().equals(user.getId())){
