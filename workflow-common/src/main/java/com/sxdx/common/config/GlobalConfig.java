@@ -5,8 +5,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * 全局配置类
- * 
- * @author ruoyi
  */
 @Component
 @ConfigurationProperties(prefix = "workflow")
@@ -21,12 +19,8 @@ public class GlobalConfig
     /** 版权年份 */
     private static String copyrightYear;
 
-
     /** 上传路径 */
     private static String profile;
-
-    /** 当前操作人**/
-    private static String operator;
 
 
     public static String getName()
@@ -93,11 +87,4 @@ public class GlobalConfig
         return getProfile() + "/upload";
     }
 
-    public static String getOperator() {
-        return operator;
-    }
-
-    public void setOperator(String operator) {
-        GlobalConfig.operator = operator;
-    }
 }

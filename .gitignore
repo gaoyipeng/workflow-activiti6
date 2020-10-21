@@ -3,6 +3,5 @@
 **/.idea/
 **/log/
 **/*.iml
-/febs-cloud/.txlcn/
 **/spy.log
 logs/
