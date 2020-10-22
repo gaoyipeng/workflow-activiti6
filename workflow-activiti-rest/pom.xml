@@ -142,6 +142,14 @@
             <artifactId>springfox-swagger-ui</artifactId>
         </dependency>
 
+        <!--swagger静态化输出依赖-->
+        <dependency>
+            <groupId>io.github.swagger2markup</groupId>
+            <artifactId>swagger2markup</artifactId>
+            <version>1.3.3</version>
+        </dependency>
+
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -202,8 +210,27 @@
         </dependency>
 
     </dependencies>
-
+    <repositories>
+        <repository>
+            <id>spring-libs-milestone</id>
+            <url>https://repo.spring.io/libs-milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- jhipster-needle-maven-repository -->
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-plugins-release</id>
+            <url>https://repo.spring.io/plugins-release</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
     <build>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -226,6 +253,30 @@
                 <version>2.4.2</version>
                 <configuration>
                     <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+
+
+            <!--swagger静态化插件 先执行测试类生成.adoc文件再运行maven命令 asciidoctor:process-asciidoc生成html-->
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>1.5.6</version>
+                <configuration>
+                    <sourceDirectory>./docs/asciidoc/generated</sourceDirectory>
+                    <outputDirectory>./docs/asciidoc/html</outputDirectory>
+                    <headerFooter>true</headerFooter>
+                    <doctype>book</doctype>
+                    <backend>html</backend>
+                    <sourceHighlighter>coderay</sourceHighlighter>
+                    <attributes>
+                        <!--菜单栏在左边-->
+                        <toc>left</toc>
+                        <!--多标题排列-->
+                        <toclevels>3</toclevels>
+                        <!--自动打数字序号-->
+                        <sectnums>true</sectnums>
+                    </attributes>
                 </configuration>
             </plugin>
         </plugins>

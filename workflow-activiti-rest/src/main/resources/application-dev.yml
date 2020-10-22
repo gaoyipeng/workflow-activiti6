@@ -20,6 +20,7 @@ spring:
     check-process-definitions: false
     # 检测身份信息表是否存在
     db-identity-used: false
+    async-executor-activate: true
   datasource:
     dynamic:
       p6spy: true
