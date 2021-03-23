@@ -382,10 +382,11 @@ public class ProcessServiceImpl implements ProcessService {
             }
             //任务委托处理
             DelegationState delegationState = task.getDelegationState();
-            if (delegationState.toString().equals("PENDING")){
+            if (delegationState != null && "PENDING".equals(delegationState.toString())){
                 taskService.resolveTask(taskId,formProperties);
+            }else{
+                taskService.complete(taskId, formProperties);
             }
-            taskService.complete(taskId, formProperties);
         } finally {
             identityService.setAuthenticatedUserId(null);
         }
