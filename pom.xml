@@ -22,7 +22,7 @@
         <java.version>1.8</java.version>
         <druid.version>1.1.23</druid.version>
         <swagger.version>2.9.2</swagger.version>
-        <fastjson.version>1.2.68</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <activiti.version>6.0.0</activiti.version>
         <pagehelper.boot.version>1.2.5</pagehelper.boot.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
